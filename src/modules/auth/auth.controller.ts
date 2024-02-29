@@ -25,11 +25,11 @@ export class AuthController {
     const { tokens, error } = req.user
     if (error) {
       return res.redirect(
-        `http://https://uncappedtheory.com/sign-in?status=${error.status}&message=${error.message}`,
+        `https://uncappedtheory.com/sign-in?status=${error.status}&message=${error.message}`,
       )
     }
     return res.redirect(
-      `http://https://uncappedtheory.com/sign-in?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
+      `https://uncappedtheory.com/sign-in?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
     )
   }
 
@@ -45,11 +45,11 @@ export class AuthController {
     const { tokens, error } = req.user
     if (error) {
       return res.redirect(
-        `http://https://uncappedtheory.com/sign-in?status=${error.status}&message=${error.message}`,
+        `https://uncappedtheory.com/sign-in?status=${error.status}&message=${error.message}`,
       )
     }
     return res.redirect(
-      `http://https://uncappedtheory.com/sign-in?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
+      `https://uncappedtheory.com/sign-in?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
     )
   }
 
