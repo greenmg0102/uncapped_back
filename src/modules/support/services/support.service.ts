@@ -1,7 +1,6 @@
 import { Support } from 'src/modules/support/schema/support.schema';
 import { Model, Schema as MongooseSchema } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { MailerService } from '@nestjs-modules/mailer';
 import { EmailService } from './EmailServer.service';
 
 export class SupportService {
@@ -12,40 +11,46 @@ export class SupportService {
 
   async post(body: any) {
 
-    let real: any = {}
+    this.sendEmail()
+    return { isOk: true }
 
-    real.fullName = body.fullName
-    real.mail = body.mail
-    real.phone = body.phone
-    real.type = body.type
-    real.subject = body.subject
-    real.checked = false
-    real.question = [{
-      query: body.content,
-      who: false,
-      supportedDate: new Date().toISOString().replace('T', ' ').replace(/\..+/, '')
-    }]
 
-    let newSupportModel = new this.supportModel(real)
+    // console.log("post", body);
 
-    return await newSupportModel
-      .save()
-      .then((result: any) => {
-        // this.sendEmail()
-        return { isOk: true }
-      })
-      .catch((err: any) => {
-        return { isOk: false }
-      })
+    // let real: any = {}
+
+    // real.fullName = body.fullName
+    // real.mail = body.mail
+    // real.phone = body.phone
+    // real.type = body.type
+    // real.subject = body.subject
+    // real.checked = false
+    // real.question = [{
+    //   query: body.content,
+    //   who: false,
+    //   supportedDate: new Date().toISOString().replace('T', ' ').replace(/\..+/, '')
+    // }]
+
+    // let newSupportModel = new this.supportModel(real)
+
+    // return await newSupportModel
+    //   .save()
+    //   .then((result: any) => {
+    //     // this.sendEmail()
+    //     return { isOk: true }
+    //   })
+    //   .catch((err: any) => {
+    //     return { isOk: false }
+    //   })
   }
 
   async sendEmail() {
-    const to = 'recipient@example.com';
+    const to = 'comantivirus250@gmail.com';
     const subject = 'Test Email';
     const template = 'welcome';
     const context = { name: 'John Doe' };
 
-    await this.emailService.sendEmail(to, subject, template, context);
+    this.emailService.sendEmail(to, subject, template, context);
 
     return 'Email sent successfully';
   }

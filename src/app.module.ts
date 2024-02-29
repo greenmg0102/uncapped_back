@@ -59,25 +59,21 @@ import * as path from 'path'; // Import the path module
       exclude: ['/api/v1/*'],
     }),
 
-    // ServeStaticModule.forRoot({
-    //   rootPath: join(__dirname, '..', 'public'),
-    // }),
-
     MailerModule.forRoot({
       transport: {
-        host: 'uncappedtheory.com',
+        host: 'smtp.domain.com',
         port: 587,
         secure: false,
         auth: {
           user: 'comantivirus250@gmail.com',
-          pass: 'Supernover@525',
+          pass: 'Supernova@525',
         },
       },
       defaults: {
-        from: '"Upto" <uncappedtheory@support.com>',
+        from: '"Your Name" <comantivirus250@gmail.com>',
       },
       template: {
-        dir: path.join(__dirname, '..', 'templates'), // Construct the absolute path to the 
+        dir: __dirname + '/templates',
         adapter: new PugAdapter(),
         options: {
           strict: true,
@@ -92,7 +88,6 @@ import * as path from 'path'; // Import the path module
         expiresIn: '356d',
       },
     }),
-
 
     UserModule,
     AuthModule,
