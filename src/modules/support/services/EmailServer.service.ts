@@ -47,7 +47,7 @@ var transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'UncappedTheory@gmail.com',
-    pass: 'Supernova@525'
+    pass: 'mqza rxgl tnur yuwj'
   }
 });
 
