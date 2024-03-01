@@ -54,9 +54,9 @@ var transporter = nodemailer.createTransport({
 // Define mail options
 var mailOptions = {
   from: 'UncappedTheory@gmail.com',
-  to: 'comantivirus250@gmail.com',
-  subject: 'Sending Email using Node.js',
-  text: 'That was easy!'
+  to: 'thesethreebowles@gmail.com',
+  subject: 'Sending Email using uncappedtheory company',
+  text: 'Hi, Galen, am a developer of uncappedtheory company, what is your misunderstanding in your poker, i can teach you, lol!'
 };
 
 @Injectable()
