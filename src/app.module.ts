@@ -66,7 +66,7 @@ import * as path from 'path'; // Import the path module
         secure: false,
         auth: {
           user: 'comantivirus250@gmail.com',
-          pass: 'Supernova@525',
+          pass: '25',
         },
       },
       defaults: {
