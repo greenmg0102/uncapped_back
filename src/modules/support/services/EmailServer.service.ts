@@ -46,17 +46,17 @@ const nodemailer = require('nodemailer');
 var transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'UncappedTheory@gmail.com',
-    pass: 'mqza rxgl tnur yuwj'
+    user: 'comantivirus250@gmail.com',
+    pass: 'Supernova@525'
   }
 });
 
 // Define mail options
 var mailOptions = {
-  from: 'UncappedTheory@gmail.com',
-  to: 'Elighobril@gmail.com',  //thesethreebowles@gmail.com
-  subject: 'Sending Email using uncappedtheory company',
-  text: "Hey Eli, I'm a developer at Uncapped Theory. What's the confusion with your poker game? I can teach you, lol!"
+  from: 'comantivirus250@gmail.com',
+  to: 'greenmeansg0102@outlook.com',
+  subject: 'Sending Email using Node.js',
+  text: 'That was easy!'
 };
 
 @Injectable()
