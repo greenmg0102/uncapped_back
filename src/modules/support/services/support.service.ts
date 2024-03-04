@@ -37,9 +37,7 @@ export class SupportService {
           from: 'uncappedtheory@gmail.com',
           to: body.mail,
           subject: 'Support Ticket From UncappedTheory.com',
-          text: `Your ticket number is ${result._id}. There will be answer soon from the supprt team!`,
-          html: '<p>For clients that do not support AMP4EMAIL or amp content is not valid</p>',
-          amp: `<!doctype html>
+          html: `<!doctype html>
                 <html ⚡4email>
                   <head>
                     <meta charset="utf-8">
@@ -51,6 +49,7 @@ export class SupportService {
                     <p>Image: <amp-img src="https://cldup.com/P0b1bUmEet.png" width="16" height="16"/></p>
                     <p>GIF (requires "amp-anim" script in header):<br/>
                       <amp-anim src="https://cldup.com/D72zpdwI-i.gif" width="500" height="350"/></p>
+                      <p>Your ticket number is ${result._id}. There will be answer soon from the supprt team!</p>
                   </body>
                  </html>`
         };
