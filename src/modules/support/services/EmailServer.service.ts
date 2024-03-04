@@ -50,7 +50,6 @@ var transporter = nodemailer.createTransport({
   }
 });
 
-
 @Injectable()
 export class EmailService {
   constructor(private readonly mailerService: MailerService) { }

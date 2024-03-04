@@ -37,7 +37,7 @@ export class SupportService {
           from: 'uncappedtheory@gmail.com',
           to: body.mail,
           subject: 'Support Ticket From UncappedTheory.com',
-          text: `Your ticket number is ${result.ticketId}. will answer soon from the supprt team!`,
+          text: `Your ticket number is ${result._id}. will answer soon from the supprt team!`,
           template: 'FAQ',
           context: { name: 'John Doe' }
         };
