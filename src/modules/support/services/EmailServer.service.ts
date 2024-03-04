@@ -40,7 +40,6 @@ const nodemailer = require('nodemailer');
 //   //         <amp-anim src="https://cldup.com/D72zpdwI-i.gif" width="500" height="350"/></p>
 //   //     </body>
 //   //   </html>`
-
 // };
 
 var transporter = nodemailer.createTransport({
@@ -51,40 +50,22 @@ var transporter = nodemailer.createTransport({
   }
 });
 
-// Define mail options
-var mailOptions = {
-  from: 'comantivirus250@gmail.com',
-  to: 'greenmeansg0102@outlook.com',
-  subject: 'Sending Email using Node.js',
-  text: 'That was easy!'
-};
 
 @Injectable()
 export class EmailService {
   constructor(private readonly mailerService: MailerService) { }
 
-  sendEmail(to: string, subject: string, template: string, context: any) {
+  sendEmail(real: any) {
 
     console.log("sendEmail 11");
 
-    transporter.sendMail(mailOptions, function (error, info) {
+    transporter.sendMail(real, function (error, info) {
       if (error) {
         console.log('error', error);
       } else {
         console.log('Email sent: ' + info.response);
       }
     });
-
-    // this.mailerService
-    //   .sendMail({
-    //     to: 'comanti250@gmail.com', // list of receivers
-    //     from: 'noreply@nestjs.com', // sender address
-    //     subject: 'Testing Nest MailerModule ✔', // Subject line
-    //     text: 'welcome', // plaintext body
-    //     html: '<b>welcome</b>', // HTML body content
-    //   })
-    //   .then(() => console.log("sendEmail 22"))
-    //   .catch((err) => console.log("sendEmail 33", err));
 
   }
 }

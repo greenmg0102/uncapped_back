@@ -5,7 +5,6 @@ import { SupportAdminService } from '../services/support.admin.service';
 
 @Controller('support')
 export class SupportController {
-
     constructor(
         private supportService: SupportService,
         private supportAdminService: SupportAdminService,
@@ -34,5 +33,5 @@ export class SupportController {
     async anwserSend(@Body() body: any) {
         return await this.supportAdminService.anwserSend(body)
     }
-    
+
 }

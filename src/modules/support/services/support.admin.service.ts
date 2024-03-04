@@ -1,10 +1,12 @@
 import { Support } from 'src/modules/support/schema/support.schema';
 import { Model, Schema as MongooseSchema } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { EmailService } from './EmailServer.service';
 
 export class SupportAdminService {
   constructor(
     @InjectModel(Support.name) private readonly supportModel: Model<Support>,
+    private readonly emailService: EmailService
   ) { }
 
   async postGet(body: any) {
@@ -38,11 +40,21 @@ export class SupportAdminService {
       .findOneAndUpdate({ _id: body.id }, { question: question, checked: true })
       .exec()
       .then((res: any) => {
+
+        var mailOptions = {
+          from: 'uncappedtheory@gmail.com',
+          to: res.mail,
+          subject: 'Support team" answer about your ticket From UncappedTheory.com',
+          text: `Your ticket number is ${res._id}. Plz check your ticket!`,
+          template: 'FAQ',
+          context: { name: 'John Doe' }
+        };
+
+        this.emailService.sendEmail(mailOptions)
         return { isOk: true }
       })
       .catch((err) => {
         return { isOk: false }
       });
   }
-
 }

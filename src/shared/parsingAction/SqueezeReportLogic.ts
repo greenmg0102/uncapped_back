@@ -39,9 +39,7 @@ export function SqueezeReportLogic(body: any) {
         }));
       }));
     } catch (error) {
-      // Handle the error here, for example:
-      console.error('An error occurred:', error);
-      // You can also take appropriate actions based on the error, such as logging, notifying, or handling the error gracefully.
+      console.error('An error occurred in processBuffer');
     }
   };
 

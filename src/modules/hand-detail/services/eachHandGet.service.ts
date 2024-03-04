@@ -13,13 +13,15 @@ export class EachHandGetService {
 
   async getHands(pageData: any): Promise<any> {
 
+    
+    
     const { pageNumber, pageSize, pokerType, tableSize, heroPosition, range, userId } = pageData;
-
+    
     let seatNumber = this.getPlayerSeatNumber(heroPosition)
 
     const skip = (pageNumber - 1) * pageSize;
     const limit = pageSize;
-
+    
     const query = {
       userId: new mongoose.Types.ObjectId(userId),
       pokerRoomId: pokerType === "N/A" ? { $regex: new RegExp("", "i") } : pokerType,

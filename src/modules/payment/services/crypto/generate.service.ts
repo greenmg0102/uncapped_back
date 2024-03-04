@@ -1,6 +1,5 @@
 
 import { generatingAddress } from 'src/shared/payment/generatingAddress'
-import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Schema as MongooseSchema } from 'mongoose';
 import { PayLog } from 'src/modules/payment/schemas/paylog.schema';
@@ -28,13 +27,12 @@ export class GenerateService {
         let result = await newPayLog
             .save()
             .then(async (res: any) => {
-
-
                 const updatedResult = await this.profileModal.findOneAndUpdate(
                     { _id: new ObjectId(body.profilesId) },
                     { premiumId: new ObjectId(body.premiumId) },
                     { new: true }
                 );
+                return true
             })
             .catch((err: any) => {
                 return false

@@ -11,46 +11,69 @@ export class SupportService {
 
   async post(body: any) {
 
-    this.sendEmail()
-    return { isOk: true }
+    console.log('body', body);
 
+    let real: any = {}
 
-    // console.log("post", body);
+    real.fullName = body.fullName
+    real.mail = body.mail
+    real.phone = body.phone
+    real.type = body.type
+    real.subject = body.subject
+    real.checked = false
+    real.question = [{
+      query: body.content,
+      who: false,
+      supportedDate: new Date().toISOString().replace('T', ' ').replace(/\..+/, '')
+    }]
 
-    // let real: any = {}
+    let newSupportModel = new this.supportModel(real)
 
-    // real.fullName = body.fullName
-    // real.mail = body.mail
-    // real.phone = body.phone
-    // real.type = body.type
-    // real.subject = body.subject
-    // real.checked = false
-    // real.question = [{
-    //   query: body.content,
-    //   who: false,
-    //   supportedDate: new Date().toISOString().replace('T', ' ').replace(/\..+/, '')
-    // }]
-
-    // let newSupportModel = new this.supportModel(real)
-
-    // return await newSupportModel
-    //   .save()
-    //   .then((result: any) => {
-    //     // this.sendEmail()
-    //     return { isOk: true }
-    //   })
-    //   .catch((err: any) => {
-    //     return { isOk: false }
-    //   })
+    return await newSupportModel
+      .save()
+      .then((result: any) => {
+        var mailOptions = {
+          from: 'uncappedtheory@gmail.com',
+          to: body.mail,
+          subject: 'Support Ticket From UncappedTheory.com',
+          text: `Your ticket number is ${result.ticketId}. will answer soon from the supprt team!`,
+          template: 'FAQ',
+          context: { name: 'John Doe' }
+        };
+    
+        this.emailService.sendEmail(mailOptions)
+    
+        return { isOk: true }
+      })
+      .catch((err: any) => {
+        return { isOk: false }
+      })
   }
 
-  async sendEmail() {
-    const to = 'comantivirus250@gmail.com';
-    const subject = 'Test Email';
-    const template = 'welcome';
-    const context = { name: 'John Doe' };
+  async sendEmail(mail: any, ticketId: any) {
 
-    this.emailService.sendEmail(to, subject, template, context);
+    var mailOptions = {
+      from: 'uncappedtheory@gmail.com',
+      to: mail,
+      subject: 'Support Ticket From UncappedTheory.com',
+      text: `Your ticket number is ${ticketId}. will answer soon from the supprt team!`,
+      template: 'FAQ',
+      context: { name: 'John Doe' }
+    };
+
+    this.emailService.sendEmail(mailOptions);
+
+
+    var mailOptions = {
+      from: 'uncappedtheory@gmail.com',
+      to: mail,
+      subject: 'Support Ticket From UncappedTheory.com',
+      text: `Your ticket number is ${ticketId}. will answer soon from the supprt team!`,
+      template: 'FAQ',
+      context: { name: 'John Doe' }
+    };
+
+    this.emailService.sendEmail(mailOptions)
 
     return 'Email sent successfully';
   }
