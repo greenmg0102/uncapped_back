@@ -56,8 +56,6 @@ export class EmailService {
 
   sendEmail(real: any) {
 
-    console.log("sendEmail", real);
-
     transporter.sendMail(real, function (error: any, info: any) {
       if (error) {
         console.log('error', error);
