@@ -65,12 +65,12 @@ import * as path from 'path'; // Import the path module
         port: 587,
         secure: false,
         auth: {
-          user: 'comantivirus250@gmail.com',
+          user: 'uncappedtheory@gmail.com',
           pass: 'Supernova@525',
         },
       },
       defaults: {
-        from: '"Your Name" <comantivirus250@gmail.com>',
+        from: '"Your Name" <uncappedtheory@gmail.com>',
       },
       template: {
         dir: __dirname + '/templates',
