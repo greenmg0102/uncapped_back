@@ -46,7 +46,7 @@ var transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'uncappedtheory@gmail.com',
-    pass: 'Supernova@525'
+    pass: 'ZnrVFGLqb8q6iv5E '
   }
 });
 
@@ -57,9 +57,9 @@ export class EmailService {
 
   sendEmail(real: any) {
 
-    console.log("sendEmail 11");
+    console.log("sendEmail", real);
 
-    transporter.sendMail(real, function (error, info) {
+    transporter.sendMail(real, function (error: any, info: any) {
       if (error) {
         console.log('error', error);
       } else {

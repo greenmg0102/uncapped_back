@@ -32,6 +32,7 @@ export class SupportService {
     return await newSupportModel
       .save()
       .then((result: any) => {
+        
         var mailOptions = {
           from: 'uncappedtheory@gmail.com',
           to: body.mail,
