@@ -34,7 +34,7 @@ export class SupportService {
       .then((result: any) => {
 
         var mailOptions = {
-          from: 'uncappedtheory@gmail.com',
+          from: 'UncappedTheory@gmail.com',
           to: body.mail,
           subject: 'Support Ticket From UncappedTheory.com',
           html: `

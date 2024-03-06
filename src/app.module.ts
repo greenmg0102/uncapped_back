@@ -24,6 +24,7 @@ import { DataStreamApiModule } from './modules/data-stream-api/data-stream-api.m
 import { HandHistoryParsingModule } from './modules/hand-history-parsing/hand-history-parsing.module';
 import { DatabaseStorageModule } from './modules/database-storage/database-storage.module';
 import { HandDetailModule } from './modules/hand-detail/hand-detail.module';
+import { NotificationModule } from './modules/notification/notification.module';
 import { ActivityLogModule } from './modules/activityLog/activity-log.module';
 import { PreflopchartAnaylzeModule } from './modules/preflopchart-anaylze/preflopchart-analyze.module';
 import { SupportModule } from './modules/support/support.module';
@@ -65,12 +66,12 @@ import * as path from 'path'; // Import the path module
         port: 587,
         secure: false,
         auth: {
-          user: 'uncappedtheory@gmail.com',
+          user: 'UncappedTheory@gmail.com',
           pass: 'Supernova@525',
         },
       },
       defaults: {
-        from: '"Your Name" <uncappedtheory@gmail.com>',
+        from: '"Your Name" <UncappedTheory@gmail.com>',
       },
       template: {
         dir: __dirname + '/templates',
@@ -97,6 +98,7 @@ import * as path from 'path'; // Import the path module
 
     DatabaseStorageModule,
     HandDetailModule,
+    NotificationModule,
     ActivityLogModule,
     PreflopchartAnaylzeModule,
     SupportModule,
