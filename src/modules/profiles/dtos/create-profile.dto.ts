@@ -6,4 +6,6 @@ export class CreateProfileDto {
   lastName: string
   displayName: string
   socialAvatar: string
+  role: string
+  premiumId: string
 }

@@ -1,8 +1,9 @@
 import { Response } from 'express'
 import { Types } from 'mongoose'
-import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common'
+import { Controller, Get, Req, Res, Post, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { AuthService } from './auth.service'
+import { MailAuth } from './services/mail.auth.service'
 import { Tokens } from '../../common/interfaces'
 import { GetUserId, GetUserRt } from '../../common/decorators'
 
@@ -10,12 +11,23 @@ import { GetUserId, GetUserRt } from '../../common/decorators'
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly mailAuth: MailAuth,
   ) { }
+
+  @Post('mail/login')
+  async mailLogin(@Req() req: any, @Res() res: Response) {
+    let tokens = await this.mailAuth.mail(req.body)
+    console.log('4', tokens);
+    
+    return res.status(200).json({
+      result: true,
+      redirectUrl: `https://uncappedtheory.com/sign-in?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
+    });
+  }
 
   @Get('google/login')
   @UseGuards(AuthGuard('google'))
   googleLogin() {
-
     return ''
   }
 

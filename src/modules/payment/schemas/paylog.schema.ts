@@ -22,7 +22,7 @@ export class PayLog {
   premiumId: PremiumOption
 
   @Prop({ required: true })
-  currentType: number      // 0: classical  1: crypto  2: card
+  currentType: number      // 0: classical  1: crypto
 
   @Prop({ required: true })
   period: number    // 0: monthly  1: yearly

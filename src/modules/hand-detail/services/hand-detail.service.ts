@@ -8,6 +8,10 @@ export class HandDetailService {
         private readonly eachHandGetService: EachHandGetService, 
     ) { }
 
+    async deleteHand(pageData: any): Promise<any> {
+        return this.eachHandGetService.deleteHand(pageData);
+    }
+
     async getHands(pageData: any): Promise<any> {
         return this.eachHandGetService.getHands(pageData);
     }

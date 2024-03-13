@@ -35,6 +35,21 @@ export class HandDetailController {
         const hands = await this.handDetailService.getHands(bufferBody);
         return hands;
     }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post('/deleteHand')
+    async deleteHand(@Req() req: Request, @Body() body: any) {
+
+        const user: any = req.user;
+        const userId = user.sub._id;
+
+        let bufferBody = body
+        bufferBody.userId = userId
+
+        this.activityLogService.logCreate(req, "3-1")
+        const hands = await this.handDetailService.deleteHand(bufferBody);
+        return hands;
+    }
     
     @UseGuards(AuthGuard('jwt'))
     @Get('/getHand/:handId')

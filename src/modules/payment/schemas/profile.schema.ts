@@ -25,7 +25,7 @@ export class Profile {
   @Prop({ required: true })
   socialAvatar: string
 
-  @Prop({ type: SchemaTypes.ObjectId, ref: 'Roles', unique: true })
+  @Prop({ type: SchemaTypes.ObjectId, ref: 'roles'})
   role: string
 
   @Prop()
