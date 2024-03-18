@@ -15,8 +15,11 @@ export class User {
   @Prop()
   customerId?: string
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   email: string
+
+  @Prop({ required: true })
+  password: string
 
   @Prop()
   subscriptionId?: string

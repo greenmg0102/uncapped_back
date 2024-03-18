@@ -40,12 +40,12 @@ export class ActivityReadService {
         return bList;
     }
 
-    async getStatisticInfo(req: any) {
-
+    async getStatisticInfo() {
+        
         let totalUser = await this.userModel.countDocuments()
         let totalHand = await this.handHistoryModel.countDocuments()
         let totalVisit = await this.activitylogModel.countDocuments({ activity: "3-1" })
-
+        
         return {
             totalUser: totalUser,
             totalHand: totalHand,

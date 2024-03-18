@@ -17,12 +17,21 @@ export class AuthController {
   @Post('mail/login')
   async mailLogin(@Req() req: any, @Res() res: Response) {
     let tokens = await this.mailAuth.mail(req.body)
-    console.log('4', tokens);
-    
-    return res.status(200).json({
-      result: true,
-      redirectUrl: `https://uncappedtheory.com/sign-in?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
-    });
+
+
+    if (tokens.result) {
+      return res.status(200).json({
+        result: true,
+        redirectUrl: `https://uncappedtheory.com/sign-in?accessToken=${tokens.tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
+      });
+    } else {
+      return res.status(200).json({
+        result: false,
+        message: tokens.message
+      });
+    }
+
+
   }
 
   @Get('google/login')

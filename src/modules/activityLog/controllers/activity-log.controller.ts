@@ -23,9 +23,9 @@ export class ActivityLogController {
     }
 
     @Get('/get-statistic-info')
-    async getStatisticInfo(@Req() req: Request) {
+    async getStatisticInfo() {
 
-        const hands = await this.activityReadService.getStatisticInfo(req);
+        const hands = await this.activityReadService.getStatisticInfo();
         return hands;
     }
 

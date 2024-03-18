@@ -19,6 +19,10 @@ export class UserService {
     return user.provider === provider
   }
 
+  async findByEmail(email: any): Promise<UserDocument> {
+    return await this.userRepository.findByEmail(email)
+  }
+
   async createUser(user: CreateUserDto): Promise<UserDocument> {
     return await this.userRepository.createUser(user)
   }

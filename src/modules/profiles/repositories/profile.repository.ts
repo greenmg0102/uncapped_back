@@ -159,18 +159,14 @@ export class ProfileRepository {
   async createProfile(profile: CreateProfileDto): Promise<ProfileDocument> {
     try {
       const createdProfile = new this.profileModel(profile)
-      console.log('1', createdProfile);
 
       await createdProfile.save().then((result: any) => {
-        console.log("save", result);
       }).catch((err: any) => {
         console.log('err', err);
       })
       return
     }
     catch (e) {
-      console.log('2');
-
       console.log(e)
     }
   }
