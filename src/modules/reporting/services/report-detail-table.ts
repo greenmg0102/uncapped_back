@@ -11,7 +11,7 @@ export class ReportDetailTableService {
 
   async detailedTable(body: any) {
 
-    let actionArray = ["RFI", "vs RFI", "3-Bet", "vs 3-Bet", "4-Bet", "vs 4-Bet", "5-Bet" ]
+    let actionArray = ["RFI", "vs RFI", "3-Bet", "vs 3-Bet", "4-Bet", "vs 4-Bet", "5-Bet"]
 
     // let matchObj = {
     //   userId: new mongoose.Types.ObjectId(body.userId),

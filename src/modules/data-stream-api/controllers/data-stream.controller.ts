@@ -174,8 +174,6 @@ async streamOne(@Req() request: Request) {
           .saveHistory(data.data, roomType, userId)
           .then((res: any) => {
 
-            console.log('save!');
-
             parsedFiles++;
             notParsedFiles = correctFiles - parsedFiles;
           })
