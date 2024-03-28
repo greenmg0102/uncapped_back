@@ -14,6 +14,7 @@ class IPokerStrategyService extends BaseParser {
 
   async parse(sections: string[]): Promise<ParsedReturnData> {
 
+
     let data: ParsedReturnData = {
       data: [],
       parsedNumber: 0,

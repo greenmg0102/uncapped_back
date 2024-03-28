@@ -115,6 +115,42 @@ export class HandHistory {
     }
   };
 
+  @Prop({
+    type: {
+      heroPosition: Number,
+      stackDepth: Number,
+      action: [{
+        category: [String],
+        villain: [],
+        bettingAction: {
+          fold: Number,
+          raise: Number,
+          check: Number,
+          call: Number,
+          allin: Number,
+        },
+        _id: false
+      }],
+    },
+    _id: false
+  })
+  reportDetail: {
+    heroPosition: number;
+    stackDepth: number;
+    action: {
+      category: string[];
+      villain: [];
+      bettingAction: {
+        fold: number;
+        raise: number;
+        check: number;
+        call: number;
+        allin: number;
+      };
+    }[];
+  };
+
+
   @Prop({ required: false })
   handId: string;
 

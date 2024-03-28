@@ -51,7 +51,7 @@ export class ReportScatterService {
                 };
 
                 let userDataSection = await this.reportUserGeneratingService.userDataGenerating(bufferBody);
-                let userData = userDataFrequencySort(userDataSection);
+                let userData = userDataFrequencySort(userDataSection, "RFI");
 
                 real.push({
                     action: body.action,

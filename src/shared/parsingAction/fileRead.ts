@@ -35,7 +35,6 @@ export function sumAverage(real: any): any {
       weight: Number(weight / real.length),
       played: arraySumAverage(played),
       evs: arraySumAverage(evs)
-
     }
   })
   return result
@@ -62,7 +61,7 @@ export function actionDistinguish(frequency: any, actions: any): any {
 
   evsItem[0] = indexFold !== -1 ? frequency.evs[indexFold] : 0
   evsItem[1] = indexCall !== -1 ? frequency.evs[indexCall] : 0
-  evsItem[2] = indexListRaise.length === 2 ? 0 : indexListRaise.length === 2 ? frequency.evs[indexListRaise[0]] : 0
+  evsItem[2] = indexListRaise.length === 0 ? 0 : indexListRaise.length === 2 ? frequency.evs[indexListRaise[0]] : 0
   evsItem[3] = indexListRaise.length === 0 ? 0 : indexListRaise.length === 2 ? frequency.evs[indexListRaise[1]] : frequency.evs[indexListRaise[0]]
 
   return {

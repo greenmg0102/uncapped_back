@@ -22,18 +22,20 @@ export class ReportGeneratorService {
 
     async reportEachPair(body: any) {
         return await this.reportEachPairService.reportEachPair(body);
-    }   
-    
+    }
+
     async conditionPair(body: any) {
         return await this.conditionPairService.conditionPair(body);
     }
 
     async reportIntegration(body: any) {
 
-        let userDataSection = await this.reportUserGeneratingService.userDataGenerating(body);    
-                
-        let userData = userDataFrequencySort(userDataSection)
+        let currentAction = body.action
         
+        let userDataSection = await this.reportUserGeneratingService.userDataGenerating(body);
+
+        let userData = userDataFrequencySort(userDataSection, currentAction)
+
         return {
             userData: userData
         }
@@ -46,7 +48,7 @@ export class ReportGeneratorService {
     async userHandInfo(body: any) {
         return await this.reportUserGeneratingService.userHandInfo(body);
     }
-    
+
     async detailedTable(body: any) {
         return await this.reportDetailTableService.detailedTable(body);
     }

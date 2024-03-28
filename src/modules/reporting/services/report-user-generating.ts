@@ -56,7 +56,12 @@ export class ReportUserGeneratingService {
 
     let pipeLine = {
       userId: new mongoose.Types.ObjectId(body.userId),
-      "reportContent.action": { $elemMatch: { $eq: action } },
+      // "reportContent.action": { $elemMatch: { $eq: action } },
+      "reportDetail.action": {
+        $elemMatch: {
+          category: { $in: [action] }
+        }
+      },
       pokerRoomId: body.pokerType,
       maxTableSeats: body.tableSize,
       date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) }
@@ -74,6 +79,7 @@ export class ReportUserGeneratingService {
         $project: {
           _id: 1,
           holeCards: 1,
+          reportDetail: 1,
           "reportContent.bettingAction": 1
         }
       }

@@ -10,8 +10,8 @@ import { PokerHistoryDto } from '../dtos/history.dto';
 export class HandHistoryDataWriterService implements HandHistoryDataWriterInterface {
   constructor(
     private constants: RoomTypes,
-    private readonly handHistoryRepository: HandHistoryRepository, 
-    private readonly userHandFrequencyRepository: UserHandFrequencyRepository, 
+    private readonly handHistoryRepository: HandHistoryRepository,
+    private readonly userHandFrequencyRepository: UserHandFrequencyRepository,
   ) { }
 
   async userHandStore(currentStatus: any) {

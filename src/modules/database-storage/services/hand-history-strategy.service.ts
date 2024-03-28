@@ -1,10 +1,11 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Schema as MongooseSchema } from 'mongoose';
-import { ObjectId } from 'mongodb'; 
+import { ObjectId } from 'mongodb';
 import { PokerHistoryDto } from 'src/modules/database-storage/dtos/history.dto';
 import { HandHistory } from 'src/modules/database-storage/schemas/hand-history.schema';
 import reportingParse from 'src/shared/reportingParseWhenUpload'
+import reportingDetailParse from 'src/shared/reportingDetailParse'
 
 export class HandHistoryRepository {
   constructor(
@@ -19,7 +20,6 @@ export class HandHistoryRepository {
     catch (error) {
       throw new InternalServerErrorException('');
     }
-
     if (!history) {
       return null;
     }
@@ -31,14 +31,14 @@ export class HandHistoryRepository {
     for (const [index, query] of handHistories.entries()) {
 
       let reportContent = await reportingParse(query.pokerRoomId, query.players, query.actions, query.bigBlind, query.buttonSeat)
-      let bufferQuery = { ...query, reportContent: reportContent, userId: new ObjectId(userId) }
+      let reportDetail = await reportingDetailParse(query.pokerRoomId, query.players, query.actions, query.bigBlind, query.buttonSeat)
+      
+      let bufferQuery = { ...query, reportContent: reportContent, reportDetail: reportDetail, userId: new ObjectId(userId) }
 
       let client = await this.getHistoryByGameId(bufferQuery.handId);
 
       if (!client && bufferQuery.handId != null) {
-
         let newClient = new this.handHistoryModel(bufferQuery);
-
         await newClient
           .save()
           .then((res: any) => {
@@ -50,7 +50,6 @@ export class HandHistoryRepository {
           });
 
       } else {
-
         await this.handHistoryModel
           .findOneAndUpdate({ handId: bufferQuery.handId }, bufferQuery, { new: true })
           .exec()
@@ -63,7 +62,6 @@ export class HandHistoryRepository {
           });
       }
     }
-
     return 'Database Success';
   }
 }

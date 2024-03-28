@@ -334,6 +334,7 @@ class GgPokerStrategyService extends BaseParser {
 
   parse(sections: string[]): ParsedReturnData {
 
+
     let data: ParsedReturnData = {
       data: [],
       parsedNumber: 0,
@@ -351,6 +352,7 @@ class GgPokerStrategyService extends BaseParser {
 
       this.initHandData();
       let sectionData: ParsedHandHistory = this.ggPokerSectionParser(section);
+
 
       if (sectionData) {
         data.data.push(sectionData);
