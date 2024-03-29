@@ -1,10 +1,10 @@
 import { generateFileData, sumAverage, exchangeIntoNumberFromPositionString, extractType } from "src/shared/parsingAction/fileRead"
 import { actionRecursive } from 'src/shared/report/recursiveData'
+import { squeezeActionRecursive } from 'src/shared/report/squeezeRecursiveData'
 
 export function SqueezeReportLogic(body: any) {
 
   let actonTraking = actionRecursive[body.action]
-
 
   let result: any = []
   let max8 = ["UTG", "UTG+1", "LJ", "HJ", "CO", "BTN", "SB", "BB"]
@@ -16,45 +16,30 @@ export function SqueezeReportLogic(body: any) {
   let stackDepthList = body.stackDepthList.length === 0 ? bbData : body.stackDepthList
   let tableSize = body.tableSize
 
-  // console.log('heroPositionList', heroPositionList);
-  // console.log('heroPositionNumberList', heroPositionNumberList);
-  // console.log('stackDepthList', stackDepthList);
-  // console.log('tableSize', tableSize);
-  // console.log('villianPosition', body.villianPosition);
-  // console.log('villianPositionNumberList', villianPositionNumberList);
-
-  let buffer = actonTraking[heroPositionList[0]];
-
-
-  // console.log('actonTraking', actonTraking);
-  // console.log('heroPositionList', heroPositionList);
-  // console.log('buffer', buffer);
-  // console.log("buffer1", buffer);
-
-  const processBuffer = async () => {
-    try {
-      await Promise.all(Object.keys(buffer).map(async (key: any) => {
-        await Promise.all(buffer[key].map(async (element: any, index: any) => {
-          if (element !== "R" && villianPositionNumberList.some((which: any) => index === which)) {
-            buffer[key][index] = "C";
-          }
-        }));
-      }));
-    } catch (error) {
-      console.error('An error occurred in processBuffer');
-    }
-  };
-
-  processBuffer();
-
   stackDepthList.forEach((stack: any) => heroPositionList.forEach((position: any, order: any) => {
 
+    let buffer = squeezeActionRecursive.find((item: any) => item.squeeze === body.squeeze && item.squeezeAction === body.squeezeAction && item.position === position).rangeList
+
+    const processBuffer = async () => {
+      try {
+        await Promise.all(Object.keys(buffer).map(async (key: any) => {
+          await Promise.all(buffer[key].map(async (element: any, index: any) => {
+            if (element !== "R" && villianPositionNumberList.some((which: any) => index === which)) {
+              buffer[key][index] = "C";
+            }
+          }));
+        }));
+      } catch (error) {
+        console.error('An error occurred in processBuffer');
+      }
+    };
+
+    processBuffer();
+
     Object.keys(buffer).forEach((actionRF: any) => {
-
-      let buffer = SqueezeReportLogicRecursive(stack === 40 ? 398750 : stack, tableSize, heroPositionNumberList[order], 0, actonTraking[position][actionRF], 0)      
-      result.push(buffer)
+      let bufferLater = SqueezeReportLogicRecursive(stack === 40 ? 398750 : stack, tableSize, heroPositionNumberList[order], 0, buffer[actionRF], 0)
+      result.push(bufferLater)
     });
-
   }));
 
   return sumAverage(result)

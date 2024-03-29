@@ -31,8 +31,12 @@ export class ReportGeneratorService {
     async reportIntegration(body: any) {
 
         let currentAction = body.action
-        
-        let userDataSection = await this.reportUserGeneratingService.userDataGenerating(body);
+
+        let userDataSection = []
+
+        if (!body.isSqueeze) userDataSection = await this.reportUserGeneratingService.userDataGenerating(body);
+        else userDataSection = await this.reportUserGeneratingService.squeezeUserDataGenerating(body);
+
 
         let userData = userDataFrequencySort(userDataSection, currentAction)
 
