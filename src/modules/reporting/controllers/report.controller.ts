@@ -3,6 +3,9 @@ import { Response, Request } from 'express';
 import { AuthGuard } from '@nestjs/passport'
 import { ReportGeneratorService } from '../services/report-generator.service';
 import { GlobalOpportunityService } from '../services/global-opportunity.service';
+import { HeroRaiseSizingService } from '../services/hero-raise-sizing.service';
+import { VillainRaiseSizingService } from '../services/villain-raise-sizing.service';
+import { RaiseSizingTableService } from '../services/raise-sizing-table.service';
 
 @Controller('report')
 export class ReportController {
@@ -10,6 +13,9 @@ export class ReportController {
     constructor(
         private reportGeneratorService: ReportGeneratorService,
         private globalOpportunityService: GlobalOpportunityService,
+        private heroRaiseSizingService: HeroRaiseSizingService,
+        private villainRaiseSizingService: VillainRaiseSizingService,
+        private raiseSizingTableService: RaiseSizingTableService,
     ) { }
 
     @Post('/collections')
@@ -111,4 +117,55 @@ export class ReportController {
 
         return await this.globalOpportunityService.eachActionPosition(bufferBody)
     }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post('/raise-sizing/hero')
+    @HttpCode(200)
+    async extractingHeroRaisingTable(@Req() req: Request, @Body() body): Promise<any> {
+
+        const user: any = req.user;
+        const userId = user.sub._id;
+
+        let bufferBody = {
+            ...body,
+            userId: userId
+        }
+
+        return await this.heroRaiseSizingService.extractingHeroRaisingTable(bufferBody)
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post('/raise-sizing/villain')
+    @HttpCode(200)
+    async extractingVillainRaisingTable(@Req() req: Request, @Body() body): Promise<any> {
+
+        const user: any = req.user;
+        const userId = user.sub._id;
+
+        let bufferBody = {
+            ...body,
+            userId: userId
+        }
+
+        return await this.villainRaiseSizingService.extractingVillainRaisingTable(bufferBody)
+    }
+
+    
+    @UseGuards(AuthGuard('jwt'))
+    @Post('/raise-sizing/raisingSizeTabelExtracting')
+    @HttpCode(200)
+    async raisingSizeTabelExtracting(@Req() req: Request, @Body() body): Promise<any> {
+
+        const user: any = req.user;
+        const userId = user.sub._id;
+
+        let bufferBody = {
+            ...body,
+            userId: userId
+        }
+
+        return await this.raiseSizingTableService.raisingSizeTabelExtracting(bufferBody)
+    }
+    
+    
 }

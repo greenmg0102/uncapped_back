@@ -122,6 +122,7 @@ export class HandHistory {
       action: [{
         category: [String],
         villain: [],
+        actionAmount: Number,
         bettingAction: {
           fold: Number,
           raise: Number,
@@ -140,6 +141,7 @@ export class HandHistory {
     action: {
       category: string[];
       villain: [];
+      actionAmount: number | null;
       bettingAction: {
         fold: number;
         raise: number;
@@ -149,6 +151,12 @@ export class HandHistory {
       };
     }[];
   };
+
+  @Prop({
+    type: [[String]], // Array of arrays of strings
+    _id: false,
+  })
+  processedActionList: string[][];
 
 
   @Prop({ required: false })

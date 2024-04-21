@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb';
 import { PokerHistoryDto } from 'src/modules/database-storage/dtos/history.dto';
 import { HandHistory } from 'src/modules/database-storage/schemas/hand-history.schema';
 import reportingParse from 'src/shared/reportingParseWhenUpload'
-import reportingDetailParse from 'src/shared/reportingDetailParse'
+import reportingDetailParse, { identifyActionList } from 'src/shared/reportingDetailParse'
 
 export class HandHistoryRepository {
   constructor(
@@ -31,9 +31,11 @@ export class HandHistoryRepository {
     for (const [index, query] of handHistories.entries()) {
 
       let reportContent = await reportingParse(query.pokerRoomId, query.players, query.actions, query.bigBlind, query.buttonSeat)
+
       let reportDetail = await reportingDetailParse(query.pokerRoomId, query.players, query.actions, query.bigBlind, query.buttonSeat)
-      
-      let bufferQuery = { ...query, reportContent: reportContent, reportDetail: reportDetail, userId: new ObjectId(userId) }
+      let processedActionList = await identifyActionList(query.actions)
+
+      let bufferQuery = { ...query, reportContent: reportContent, reportDetail: reportDetail, processedActionList: processedActionList, userId: new ObjectId(userId) }
 
       let client = await this.getHistoryByGameId(bufferQuery.handId);
 

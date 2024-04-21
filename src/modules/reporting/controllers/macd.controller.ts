@@ -30,7 +30,6 @@ export class MACDController {
         return await this.reportMacdPairService.cardPair(body)
     }
 
-    
     @UseGuards(AuthGuard('jwt'))
     @Post('/hands')
     @HttpCode(200)
@@ -55,7 +54,7 @@ export class MACDController {
     @Post('/bb100')
     @HttpCode(200)
     async bb100(@Req() req: Request, @Body() body: any) {
-        
+
         const user: any = req.user;
         const userId = user.sub._id;
 

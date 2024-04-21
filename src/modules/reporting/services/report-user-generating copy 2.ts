@@ -91,31 +91,48 @@ export class ReportUserGeneratingService {
 
   async squeezeUserDataGenerating(body: any) {
 
+    console.log("squeezeUserDataGenerating", body);
+
     let actionList = body.actionLit
     let heroIndex = actionList.findIndex((item: any) => item.action === "H")
 
     let availableActionList = actionList.filter((item: any, index: any) => index < heroIndex).map((item: any) => item.action)
 
-    // let heroPosiotionList = exchangeIntoNumberFromPositionString(body.heroPosition)
-    // let villianPosiotionList = exchangeIntoNumberFromPositionString(body.VillianPosition)
-    let stackDepth = body.SqueezeStackDepth
-    // let action = body.action
+    console.log("actionList", actionList);
+    console.log("availableActionList", availableActionList);
 
+
+    let previousBuffer: any = squeezeActionRecursive.find((item: any) => item.squeeze === body.squeeze && item.squeezeAction === body.squeezeAction && item.position === body.heroPosition[0]).rangeList
+
+    let buffer = {}
+
+    Object.keys(previousBuffer).forEach((key: any) => {
+      buffer[key] = previousBuffer[key].slice(0, previousBuffer[key].length - 1)
+    })
+
+    let heroPosiotionList = exchangeIntoNumberFromPositionString(body.heroPosition)
+    let villianPosiotionList = exchangeIntoNumberFromPositionString(body.VillianPosition)
+    let stackDepth = body.stackDepth
+    let action = body.action
 
     let pipeLine = {
       userId: new mongoose.Types.ObjectId(body.userId),
       processedActionList: {
-        $elemMatch: {
-          $eq: availableActionList
-        }
+        $setEquals: [ "$processedActionList", [
+          "F",
+          "F",
+          "F",
+          "R",
+          "F"
+      ] ]
       },
       pokerRoomId: body.pokerType,
       maxTableSeats: body.tableSize,
       date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) }
     }
 
-    // if (heroPosiotionList.length > 0) pipeLine["reportDetail.heroPosition"] = { $in: heroPosiotionList }
-    // if (stackDepth.length > 0) pipeLine["reportDetail.stackDepth"] = { $in: stackDepth }
+    if (heroPosiotionList.length > 0) pipeLine["reportDetail.heroPosition"] = { $in: heroPosiotionList }
+    if (stackDepth.length > 0) pipeLine["reportDetail.stackDepth"] = { $in: stackDepth }
 
     return await this.handHistoryModel.aggregate([
       {
@@ -131,7 +148,5 @@ export class ReportUserGeneratingService {
         }
       }
     ]).exec();
-
-    // return []
   }
 }

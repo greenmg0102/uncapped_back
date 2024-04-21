@@ -31,6 +31,7 @@ export default function actionValidation(playerList: any, actionsList: any, hero
 
         let actionItem: any = {}
         actionItem.category = actionTypeValidation(real.slice(0, indexItem + 1), indexItem)
+        actionItem.actionAmount = real[indexItem].actionAmount
         actionItem.villain = villianValidation(playerList, real.slice(0, indexItem + 1)).map((item: any) => calculatingPosition(item, tableStandard, bufferBTNPosition))
 
         real.slice(0, indexItem + 1)

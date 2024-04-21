@@ -4,7 +4,7 @@ import { ReportUserGeneratingService } from './report-user-generating';
 import { ReportDetailTableService } from './report-detail-table';
 import { ReportEachPairService } from './report-each-pair';
 import { ConditionPairService } from './condition-pair';
-import userDataFrequencySort from 'src/shared/reportingParseWhenUpload/gg/userDataFrequencySort'
+import userDataFrequencySort, { squeezeUserDataFrequencySort } from 'src/shared/reportingParseWhenUpload/gg/userDataFrequencySort'
 
 @Injectable()
 export class ReportGeneratorService {
@@ -31,14 +31,18 @@ export class ReportGeneratorService {
     async reportIntegration(body: any) {
 
         let currentAction = body.action
-
         let userDataSection = []
 
         if (!body.isSqueeze) userDataSection = await this.reportUserGeneratingService.userDataGenerating(body);
         else userDataSection = await this.reportUserGeneratingService.squeezeUserDataGenerating(body);
 
+        let x = 120
+        for (let i = 0; i < 12; i++) {
+            x = 1.3 * x
+            console.log(i, ' : ', Number(x).toFixed(0));
+        }
 
-        let userData = userDataFrequencySort(userDataSection, currentAction)
+        let userData = !body.isSqueeze ? userDataFrequencySort(userDataSection, currentAction) : squeezeUserDataFrequencySort(body, userDataSection)
 
         return {
             userData: userData

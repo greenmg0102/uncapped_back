@@ -3,6 +3,8 @@ import { Model, Schema as MongooseSchema } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { exchangeIntoNumberFromPositionString } from "src/shared/parsingAction/fileRead"
 const mongoose = require('mongoose');
+
+
 export class ReportDetailTableService {
 
   constructor(
@@ -28,24 +30,24 @@ export class ReportDetailTableService {
 
     let matchObj = {
       userId: new mongoose.Types.ObjectId(body.userId),
-      // "reportContent.action": { $elemMatch: { $eq: action } },
-      "reportDetail.action": {
-        $elemMatch: {
-          category: { $in: [action] }
-        }
-      },
+      "reportDetail.action": action === "" ? { $exists: true } : { $elemMatch: { category: { $in: [body.action] } } },
       pokerRoomId: body.pokerType,
       maxTableSeats: body.tableSize,
       date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) }
-    }
+    };
 
-    if (heroPosiotionList.length > 0) matchObj["reportContent.heroPosition"] = { $in: heroPosiotionList }
-    if (villianPosiotionList.length > 0) matchObj["$or"] = villianPosiotionList.map((item: any) => { return { "reportContent.villain": { $elemMatch: { $eq: item } } } })
-    if (stackDepth.length > 0) matchObj["reportContent.stackDepth"] = { $in: stackDepth }
+
+    if (heroPosiotionList.length > 0) {
+      matchObj["reportDetail.heroPosition"] = { $in: heroPosiotionList }
+    } else {
+      matchObj["reportDetail.heroPosition"] = { $exists: true }
+    }
+    if (villianPosiotionList.length > 0) matchObj["$or"] = villianPosiotionList.map((item: any) => { return { "reportDetail.villain": { $elemMatch: { $eq: item } } } })
+    if (stackDepth.length > 0) matchObj["reportDetail.stackDepth"] = { $in: stackDepth }
 
     let groupObj = {
-      _id: "$reportContent.heroPosition",
-      reportContent: { $first: "$reportContent" },
+      _id: "$reportDetail.heroPosition",
+      reportContent: { $first: "$reportDetail" },
       totalCount: { $sum: 1 },
       bb100: {
         $sum: {

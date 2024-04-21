@@ -13,6 +13,9 @@ import { ReportMacdAllinbb100Service } from './services/report-macd-allinbb100.s
 import { ReportMacdBBService } from './services/report-macd-BB.service';
 import { ReportMacdDateService } from './services/report-macd-date.service';
 import { ReportScatterService } from './services/report-scatter.service';
+import { HeroRaiseSizingService } from './services/hero-raise-sizing.service';
+import { VillainRaiseSizingService } from './services/villain-raise-sizing.service';
+import { RaiseSizingTableService } from './services/raise-sizing-table.service';
 
 
 import { ReportUserGeneratingService } from './services/report-user-generating';
@@ -49,7 +52,10 @@ import { HandHistory, HandHistorySchema } from '../database-storage/schemas/hand
     ConditionPairService,
     ReportDetailTableService,
     ReportUserGeneratingService,
-    ReportScatterService
+    ReportScatterService,
+    HeroRaiseSizingService,
+    VillainRaiseSizingService,
+    RaiseSizingTableService
   ]
 })
 export class ReportingModule { }

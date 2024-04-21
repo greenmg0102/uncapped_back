@@ -91,22 +91,24 @@ export class ReportUserGeneratingService {
 
   async squeezeUserDataGenerating(body: any) {
 
-    let actionList = body.actionLit
-    let heroIndex = actionList.findIndex((item: any) => item.action === "H")
+    let previousBuffer: any = squeezeActionRecursive.find((item: any) => item.squeeze === body.squeeze && item.squeezeAction === body.squeezeAction && item.position === body.heroPosition[0]).rangeList
 
-    let availableActionList = actionList.filter((item: any, index: any) => index < heroIndex).map((item: any) => item.action)
+    let buffer = {}
 
-    // let heroPosiotionList = exchangeIntoNumberFromPositionString(body.heroPosition)
-    // let villianPosiotionList = exchangeIntoNumberFromPositionString(body.VillianPosition)
-    let stackDepth = body.SqueezeStackDepth
-    // let action = body.action
+    Object.keys(previousBuffer).forEach((key: any) => {
+      buffer[key] = previousBuffer[key].slice(0, previousBuffer[key].length - 1)
+    })
 
+    let heroPosiotionList = exchangeIntoNumberFromPositionString(body.heroPosition)
+    let villianPosiotionList = exchangeIntoNumberFromPositionString(body.VillianPosition)
+    let stackDepth = body.stackDepth
+    let action = body.action
 
     let pipeLine = {
       userId: new mongoose.Types.ObjectId(body.userId),
       processedActionList: {
         $elemMatch: {
-          $eq: availableActionList
+          $in: Object.values(buffer)
         }
       },
       pokerRoomId: body.pokerType,
@@ -114,8 +116,8 @@ export class ReportUserGeneratingService {
       date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) }
     }
 
-    // if (heroPosiotionList.length > 0) pipeLine["reportDetail.heroPosition"] = { $in: heroPosiotionList }
-    // if (stackDepth.length > 0) pipeLine["reportDetail.stackDepth"] = { $in: stackDepth }
+    if (heroPosiotionList.length > 0) pipeLine["reportDetail.heroPosition"] = { $in: heroPosiotionList }
+    if (stackDepth.length > 0) pipeLine["reportDetail.stackDepth"] = { $in: stackDepth }
 
     return await this.handHistoryModel.aggregate([
       {
@@ -131,7 +133,5 @@ export class ReportUserGeneratingService {
         }
       }
     ]).exec();
-
-    // return []
   }
 }

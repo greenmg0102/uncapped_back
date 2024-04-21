@@ -53,50 +53,65 @@ export default function userDataFrequencySort(list: any, action: any): any {
 
 export function squeezeUserDataFrequencySort(body: any, list: any): any {
 
+    console.log("squeezeUserDataFrequencySort", list);
+
     let real = {}
 
     list.forEach((element: any) => {
 
-        element.reportDetail.action.forEach((item: any) => {
+        let elementProcessedActionList = element.processedActionList
+        let previousBuffer: any = squeezeActionRecursive.find((item: any) => item.squeeze === body.squeeze && item.squeezeAction === body.squeezeAction && item.position === body.heroPosition[0]).rangeList
 
-            let bufferBettingAction = item.bettingAction
+        let buffer = {}
 
-            let card = distinguishCardKind(element.holeCards[0].cards)
+        Object.keys(previousBuffer).forEach((key: any) => {
+            buffer[key] = previousBuffer[key].slice(0, previousBuffer[key].length - 1)
+        })
 
-            if (card in real) {
-
-                let bufferFold = real[card].frequency.fold + bufferBettingAction.fold
-                let bufferCall = real[card].frequency.call + bufferBettingAction.call
-                let bufferRaise = real[card].frequency.raise + bufferBettingAction.raise
-                let bufferAllin = real[card].frequency.allin + bufferBettingAction.allin
-
-                real[card] = {
-                    card: card,
-                    frequency: {
-                        fold: bufferFold,
-                        call: bufferCall,
-                        raise: bufferRaise,
-                        allin: bufferAllin
-                    },
-                    foldNode: bufferBettingAction.fold !== 0 ? [...real[card].foldNode, element._id] : [...real[card].foldNode],
-                    raiseNode: bufferBettingAction.raise !== 0 ? [...real[card].raiseNode, element._id] : [...real[card].raiseNode],
-                    callNode: bufferBettingAction.call !== 0 ? [...real[card].callNode, element._id] : [...real[card].callNode],
-                    allinNode: bufferBettingAction.allin !== 0 ? [...real[card].allinNode, element._id] : [...real[card].allinNode],
-                }
-
-            } else {
-
-                real[card] = {
-                    card: card,
-                    frequency: bufferBettingAction,
-                    foldNode: bufferBettingAction.fold !== 0 ? [element._id] : [],
-                    raiseNode: bufferBettingAction.raise !== 0 ? [element._id] : [],
-                    callNode: bufferBettingAction.call !== 0 ? [element._id] : [],
-                    allinNode: bufferBettingAction.allin !== 0 ? [element._id] : [],
-                }
-            }
+        const matchedIndex = elementProcessedActionList.findIndex((arr: any) => {
+            return Object.values(buffer).some(rangeArr => {
+                return JSON.stringify(rangeArr) === JSON.stringify(arr);
+            });
         });
 
+        let bufferBettingAction = element.reportDetail.action.find((item: any) => {
+            return item.category.some((each: any) => each === element.reportDetail.action[matchedIndex].category[0])
+        }).bettingAction
+
+        let card = distinguishCardKind(element.holeCards[0].cards)
+
+        if (card in real) {
+
+            let bufferFold = real[card].frequency.fold + bufferBettingAction.fold
+            let bufferCall = real[card].frequency.call + bufferBettingAction.call
+            let bufferRaise = real[card].frequency.raise + bufferBettingAction.raise
+            let bufferAllin = real[card].frequency.allin + bufferBettingAction.allin
+
+            real[card] = {
+                card: card,
+                frequency: {
+                    fold: bufferFold,
+                    call: bufferCall,
+                    raise: bufferRaise,
+                    allin: bufferAllin
+                },
+                foldNode: bufferBettingAction.fold !== 0 ? [...real[card].foldNode, element._id] : [...real[card].foldNode],
+                raiseNode: bufferBettingAction.raise !== 0 ? [...real[card].raiseNode, element._id] : [...real[card].raiseNode],
+                callNode: bufferBettingAction.call !== 0 ? [...real[card].callNode, element._id] : [...real[card].callNode],
+                allinNode: bufferBettingAction.allin !== 0 ? [...real[card].allinNode, element._id] : [...real[card].allinNode],
+            }
+
+        } else {
+
+            real[card] = {
+                card: card,
+                frequency: bufferBettingAction,
+                foldNode: bufferBettingAction.fold !== 0 ? [element._id] : [],
+                raiseNode: bufferBettingAction.raise !== 0 ? [element._id] : [],
+                callNode: bufferBettingAction.call !== 0 ? [element._id] : [],
+                allinNode: bufferBettingAction.allin !== 0 ? [element._id] : [],
+            }
+        }
     });
     return real
 }
