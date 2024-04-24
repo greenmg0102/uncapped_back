@@ -30,17 +30,14 @@ export class ReportGeneratorService {
 
     async reportIntegration(body: any) {
 
+        console.log("reportIntegration", body);
+
+
         let currentAction = body.action
         let userDataSection = []
 
         if (!body.isSqueeze) userDataSection = await this.reportUserGeneratingService.userDataGenerating(body);
         else userDataSection = await this.reportUserGeneratingService.squeezeUserDataGenerating(body);
-
-        let x = 120
-        for (let i = 0; i < 12; i++) {
-            x = 1.3 * x
-            console.log(i, ' : ', Number(x).toFixed(0));
-        }
 
         let userData = !body.isSqueeze ? userDataFrequencySort(userDataSection, currentAction) : squeezeUserDataFrequencySort(body, userDataSection)
 

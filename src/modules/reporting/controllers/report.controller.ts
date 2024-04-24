@@ -150,7 +150,7 @@ export class ReportController {
         return await this.villainRaiseSizingService.extractingVillainRaisingTable(bufferBody)
     }
 
-    
+
     @UseGuards(AuthGuard('jwt'))
     @Post('/raise-sizing/raisingSizeTabelExtracting')
     @HttpCode(200)
@@ -166,6 +166,6 @@ export class ReportController {
 
         return await this.raiseSizingTableService.raisingSizeTabelExtracting(bufferBody)
     }
-    
-    
+
+
 }
