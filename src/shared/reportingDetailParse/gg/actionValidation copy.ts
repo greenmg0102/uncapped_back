@@ -1,10 +1,6 @@
 import { calculatingPosition } from '../index'
-import { findNearestStandard } from './index'
-
-const standards = [10, 15, 20, 25, 30, 40, 50, 60, 80, 100];
 
 export default function actionValidation(playerList: any, actionsList: any, heroPostion: any, stackRange: any, tableStandard: any, bufferBTNPosition: any, bigBlind: any): any {
-
 
     let reportDetail = {
         heroPosition: null,
@@ -50,12 +46,14 @@ export default function actionValidation(playerList: any, actionsList: any, hero
 
         let previousActionIndex = activeIndexList.findIndex((item: any) => item === indexItem)
 
+        actionItem.previousBettingAmount = 3000
+
         if (actionHeroRaiseIndexList.length === 0) actionItem.previousBettingAmount = null
-        else actionItem.previousBettingAmount = previousActionIndex === -1 || real[activeIndexList[previousActionIndex - 1]] === undefined ? bigBlind : real[activeIndexList[previousActionIndex - 1]].actionAmount
+        else {
+            actionItem.previousBettingAmount = previousActionIndex === -1 || real[activeIndexList[previousActionIndex - 1]] === undefined ? bigBlind : real[activeIndexList[previousActionIndex - 1]].actionAmount
+        }
 
-        let realVillain = villianValidation(playerList, real.slice(0, indexItem + 1), bigBlind).map((item: any) => calculatingPosition(item, tableStandard, bufferBTNPosition))
-
-        actionItem.villain = realVillain
+        actionItem.villain = villianValidation(playerList, real.slice(0, indexItem + 1)).map((item: any) => calculatingPosition(item, tableStandard, bufferBTNPosition))
 
         real.slice(0, indexItem + 1)
             .filter((item: any) => (item.playerName === "Hero" && item.street === "preFlop"))
@@ -74,67 +72,7 @@ export default function actionValidation(playerList: any, actionsList: any, hero
     return reportDetail
 }
 
-export function villianValidation(playerList: any, actionsList: any, bigBlind: any): any {
-
-    // console.log("actionsList", actionsList);
-
-    let villianNameList = actionsList
-        .filter((item: any) =>
-            item.playerName !== "Hero" &&
-            item.street === "preFlop" &&
-            (
-                item.action === "raise" || item.action === "all in, raise" ||
-                item.action === "call" || item.action === "check" ||
-                item.action === "bet" || item.action === "check"
-            )
-        );
-    // console.log("villianNameList", villianNameList);
-
-    let villainPlayerNames = villianNameList.map((villain: any) => villain.playerName);
-
-    // console.log("villainPlayerNames", villainPlayerNames);
-
-    let indexes = playerList.reduce((acc: any, obj: any, index: any) => {
-        if (villainPlayerNames.includes(obj.playerName)) {
-
-            let itemVillain: any = {}
-
-            itemVillain.position = index
-            itemVillain.villainAction = actionsList.filter((item: any) => item.playerName === obj.playerName)[0] === undefined ? null : actionsList.filter((item: any) => item.playerName === obj.playerName)[0].action
-            itemVillain.villainStackDepth = findNearestStandard((playerList.find((item: any) => item.playerName === obj.playerName).chipCount / bigBlind).toFixed(2), standards)
-
-            if (villianNameList.length === 0) {
-                itemVillain.previousActionAmount = null
-                itemVillain.currentVillainActionAmount = null
-            }
-            if (villianNameList.length === 1) {
-                itemVillain.previousActionAmount = bigBlind
-                itemVillain.currentVillainActionAmount = villianNameList[villianNameList.length - 1].actionAmount
-            }
-            else {
-                itemVillain.previousActionAmount = villianNameList[villianNameList.length - 2].actionAmount
-                itemVillain.currentVillainActionAmount = villianNameList[villianNameList.length - 1].actionAmount
-            }
-
-            let actionVillainIndexList = villianNameList.reduce((indices: number[], item: any, index: number) => {
-                if (item.playerName === obj.playerName) { indices.push(index); }
-                return indices;
-            }, []);
-
-            itemVillain.villainCategory = actionTypeValidation(villianNameList.slice(0, actionVillainIndexList[actionVillainIndexList.length - 1] + 1), actionVillainIndexList[actionVillainIndexList.length - 1])
-
-            acc.push(itemVillain);
-        }
-        return acc;
-    }, []);
-
-    return indexes
-}
-
-
 export function actionTypeValidation(preflopActioList: any, heroIndex: any): any {
-
-    // console.log("actionTypeValidation \n", "preflopActioList \n", preflopActioList, "heroIndex \n", heroIndex);
 
     let actionList = []
     // let sameBet = ["VPIP", "RFI", "vs RFI", "PFR", "3-Bet", "vs 3-Bet", "Bb/100", "4-Bet", "VS 4-Bet", "bb/100", "5-Bet +", "vs 5-Bet +"]
@@ -178,4 +116,28 @@ export function actionTypeValidation(preflopActioList: any, heroIndex: any): any
     }
 
     return actionList
+}
+
+export function villianValidation(playerList: any, actionsList: any): any {
+
+    let villianNameList = actionsList
+        .filter((item: any) =>
+            item.playerName !== "Hero" &&
+            item.street === "preFlop" &&
+            (
+                item.action === "raise" ||
+                item.action === "all in, raise" ||
+                item.action === "call" ||
+                item.action === "check" ||
+                item.action === "bet" ||
+                item.action === "check"
+            )
+        );
+    let villainPlayerNames = villianNameList.map((villain: any) => villain.playerName);
+    const indexes = playerList.reduce((acc: any, obj: any, index: any) => {
+        if (villainPlayerNames.includes(obj.playerName)) acc.push(index);
+        return acc;
+    }, []);
+
+    return indexes
 }

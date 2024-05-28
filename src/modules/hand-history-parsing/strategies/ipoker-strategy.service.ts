@@ -14,7 +14,6 @@ class IPokerStrategyService extends BaseParser {
 
   async parse(sections: string[]): Promise<ParsedReturnData> {
 
-
     let data: ParsedReturnData = {
       data: [],
       parsedNumber: 0,
@@ -28,10 +27,16 @@ class IPokerStrategyService extends BaseParser {
     };
 
     for (const section of sections) {
-      
+
       this.initHandData();
+
       const lines = section.split('\n');
-      let lineData = this.iPokerSectionParser(lines);
+
+      let heroString = lines.filter((item: any) => item.includes("Dealt to")).length > 0 && lines.filter((item: any) => item.includes("Dealt to"))[0].split(" ")[2]
+
+
+      let lineData = this.iPokerSectionParser(section, heroString);
+
       if (lineData) {
         data.data.push(lineData);
         data.parsedNumber++;
@@ -70,7 +75,7 @@ class IPokerStrategyService extends BaseParser {
     // date regex
     const dateTime = dateTimeRegex.exec(line);
     if (dateTime) {
-      this.handData.handDate = dateTime[1];
+      this.handData.handDate = dateTime[1] + " " + dateTime[2];
       this.handData.handTime = dateTime[2];
       this.handData.handTimezone = dateTime[3];
     }
@@ -129,7 +134,7 @@ class IPokerStrategyService extends BaseParser {
     }
   }
 
-  parseAction(line: string, actionFlag: string) {
+  parseAction(line: string, actionFlag: string, heroString: string) {
     // action array data
     if (actionFlag.includes('Post')) {
       // action array data
@@ -153,7 +158,7 @@ class IPokerStrategyService extends BaseParser {
             this.handData = {
               ...this.handData,
               smallBlindSeat: match[1]
-                ? this.findPlayerSeatNumber(match[1])
+                ? this.findPlayerSeatNumber(match[1] === heroString ? "Hero" : match[1])
                 : null,
               smallBlind: parseStringFloat(match[2]),
             };
@@ -161,7 +166,7 @@ class IPokerStrategyService extends BaseParser {
             this.handData = {
               ...this.handData,
               bigBlindSeat: match[1]
-                ? this.findPlayerSeatNumber(match[1])
+                ? this.findPlayerSeatNumber(match[1] === heroString ? "Hero" : match[1])
                 : null,
               bigBlind: parseStringFloat(match[2]),
             };
@@ -174,7 +179,7 @@ class IPokerStrategyService extends BaseParser {
       if (match) {
         this.handData.summary.collected.push({
           amount: parseStringFloat(match[2]),
-          playerName: this.findPlayer(match[1]),
+          playerName: this.findPlayer(match[1] === heroString ? "Hero" : match[1]),
         });
       }
     } else {
@@ -216,12 +221,12 @@ class IPokerStrategyService extends BaseParser {
 
           if (actionType === this.actionTypes.show) {
             this.handData.summary.shows.push({
-              playerName: match[1],
+              playerName: match[1] === heroString ? "Hero" : match[1],
               cards: this.getCardsDetailIPoker(match[2].split(' ')),
             });
           } else {
             this.handData.actions.push({
-              playerName: this.findPlayer(match[1]),
+              playerName: this.findPlayer(match[1] === heroString ? "Hero" : match[1]),
               action: __actionType,
               actionAmount: actionAmount,
               street: this.currentStreet,
@@ -287,12 +292,12 @@ class IPokerStrategyService extends BaseParser {
     return result;
   }
 
-  parseTableSeat(line: string) {
+  parseTableSeat(line: string, heroString: string) {
     const buttonSeatInfo = line
       .trim()
       .match(/Seat (\d+): (.+) \(\S([\d,.]+)\sin chips\) DEALER/);
     if (buttonSeatInfo) {
-      const seatNumber = this.findPlayerSeatNumber(buttonSeatInfo[1]);
+      const seatNumber = this.findPlayerSeatNumber(buttonSeatInfo[1] === heroString ? "Hero" : buttonSeatInfo[1]);
       let __seatMax = this.handData.players.length;
       this.handData = {
         ...this.handData,
@@ -302,7 +307,42 @@ class IPokerStrategyService extends BaseParser {
     }
   }
 
-  iPokerSectionParser(chunks: string[]) {
+  checkSbCaseChip(line: string): number {
+    if (line.includes('SB')) {
+
+      const numberPattern = /(\d+(?:,\d+)*(?:\.\d+)?)/;
+      const match = line.match(numberPattern);
+      const number = match ? match[1].replace(/,/g, '') : 0;
+      return Number(number);
+
+    } else return 0
+  }
+
+  checkHeroChip(line: string): number {
+
+    const numberPattern = /(\d+(?:,\d+)*(?:\.\d+)?)/;
+    const match = line.match(numberPattern);
+    const number = match ? match[1].replace(/,/g, '') : 0;
+
+    return Number(number);
+  }
+
+  checkReturnedChip(line: string): number {
+    const numberPattern = /(\d+(?:,\d+)*(?:\.\d+)?)/;
+    const match = line.match(numberPattern);
+    const number = match ? match[1].replace(/,/g, '') : 0;
+    return Number(number);
+  }
+
+
+  iPokerSectionParser(data: any, heroString: string) {
+
+    let heroChipBeforeHole = 0
+    let returnedChip = 0
+    let sbCaseChip = 0
+
+    const chunks = data.split('\n');
+
     this.currentStreet = this.street.preFlop;
     const playerRegex = /Seat (\d+): (.+) \(\S([\d,.]+)\sin chips\)/;
     const holeCardsRegex = /Dealt to (.+) \[(.+)\]/;
@@ -323,6 +363,16 @@ class IPokerStrategyService extends BaseParser {
     }
 
     for (let line of chunks) {
+
+      if (line.includes('Post') && line.includes(heroString)) {
+        heroChipBeforeHole += this.checkHeroChip(line)
+        sbCaseChip = this.checkSbCaseChip(line)
+      }
+
+      if (line.includes('wins') && line.includes(heroString)) {
+        returnedChip += this.checkReturnedChip(line)
+      }
+
       if (line.includes('GAME')) {
         this.parsePokerHand(line);
       }
@@ -340,7 +390,7 @@ class IPokerStrategyService extends BaseParser {
           if (!line.includes('out of hand')) {
             this.handData.players.push({
               seatNumber: parseStringInt(seatNumber),
-              playerName,
+              playerName: playerName === heroString ? "Hero" : playerName,
               chipCount: parseStringFloat(chipCount),
             });
           }
@@ -351,7 +401,7 @@ class IPokerStrategyService extends BaseParser {
       const holeCards = holeCardsRegex.exec(line);
       if (holeCards) {
         this.handData.holeCards.push({
-          playerName: holeCards[1],
+          playerName: holeCards[1] === heroString ? "Hero" : holeCards[1],
           cards: this.getCardsDetailIPoker(holeCards[2].split(' ')),
         });
       }
@@ -366,7 +416,7 @@ class IPokerStrategyService extends BaseParser {
       }
 
       this.handleStreet(line);
-      this.parseTableSeat(line);
+      this.parseTableSeat(line, heroString);
 
       const actionNames: string[] = [
         'Fold',
@@ -386,9 +436,15 @@ class IPokerStrategyService extends BaseParser {
         line.includes(action),
       );
       if (actionLineFlag) {
-        this.parseAction(line, actionLineFlag);
+        this.parseAction(line, actionLineFlag, heroString);
       }
     }
+
+    this.handData.rawData = data
+    this.handData.heroChipBeforeHole = heroChipBeforeHole
+    this.handData.returnedChip = returnedChip
+    this.handData.sbCaseChip = sbCaseChip
+
 
     return this.handData;
   }

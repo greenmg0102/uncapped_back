@@ -43,26 +43,54 @@ export class HeroRaiseSizingService {
                   input: "$reportDetail.action",
                   as: "action",
                   in: {
-                    $cond: {
-                      if: {
+                    $filter: {
+                      input: "$$action.villain",
+                      as: "villainAction",
+                      cond: {
                         $and: [
-                          { $eq: ["$$action.currentAction", "raise"] },
-                          { $gte: [{ $divide: ["$$action.actionAmount", "$$action.previousBettingAmount"] }, 2.0] },
-                          { $lt: [{ $divide: ["$$action.actionAmount", "$$action.previousBettingAmount"] }, 2.49] },
+                          { $gte: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$$action.previousBettingAmount"] }, 2.0] },
+                          { $lt: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$$action.previousBettingAmount"] }, 2.49] }
                         ]
-                      },
-                      then: "$$action",
-                      else: null
+                      }
                     }
                   }
                 }
               },
               as: "filteredAction",
-              cond: { $ne: ["$$filteredAction", null] }
+              cond: { $ne: ["$$filteredAction", []] }
             }
           }
         }
       },
+      // '2bb': {
+      //   $sum: {
+      //     $size: {
+      //       $filter: {
+      //         input: {
+      //           $map: {
+      //             input: "$reportDetail.action",
+      //             as: "action",
+      //             in: {
+      //               $cond: {
+      //                 if: {
+      //                   $and: [
+      //                     { $eq: ["$$action.currentAction", "raise"] },
+      //                     { $gte: [{ $divide: ["$$action.actionAmount", "$$action.previousBettingAmount"] }, 2.0] },
+      //                     { $lt: [{ $divide: ["$$action.actionAmount", "$$action.previousBettingAmount"] }, 2.49] },
+      //                   ]
+      //                 },
+      //                 then: "$$action",
+      //                 else: null
+      //               }
+      //             }
+      //           }
+      //         },
+      //         as: "filteredAction",
+      //         cond: { $ne: ["$$filteredAction", null] }
+      //       }
+      //     }
+      //   }
+      // },
       '10bballin': {
         $sum: {
           $size: {

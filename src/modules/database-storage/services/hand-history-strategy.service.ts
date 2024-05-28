@@ -31,9 +31,8 @@ export class HandHistoryRepository {
     for (const [index, query] of handHistories.entries()) {
 
       let reportContent = await reportingParse(query.pokerRoomId, query.players, query.actions, query.bigBlind, query.buttonSeat)
-
-      let reportDetail = await reportingDetailParse(query.pokerRoomId, query.players, query.actions, query.bigBlind, query.buttonSeat)
       let processedActionList = await identifyActionList(query.actions)
+      let reportDetail = await reportingDetailParse(query.pokerRoomId, query.players, query.actions, query.bigBlind, query.buttonSeat)
 
       let bufferQuery = { ...query, reportContent: reportContent, reportDetail: reportDetail, processedActionList: processedActionList, userId: new ObjectId(userId) }
 

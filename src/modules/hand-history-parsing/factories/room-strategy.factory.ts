@@ -23,9 +23,10 @@ export class RoomStrategyFactory {
     private readonly winamaxPokerStrategyService: WinamaxPokerStrategyService,
     private readonly wpnPokerStrategyService: WpnPokerStrategyService,
     private readonly iPokerStrategyService: IPokerStrategyService,
-  ) {}
+  ) { }
 
   createStrategy(roomType: string) {
+    
     switch (roomType) {
       case this.constants.poker888:
         return this.eightStarStrategyService;

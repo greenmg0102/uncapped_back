@@ -13,6 +13,7 @@ class WpnPokerStrategyService extends BaseParser {
   }
 
   parse(sections: string[]): ParsedReturnData {
+
     let data: ParsedReturnData = {
       data: [],
       parsedNumber: 0,
@@ -28,7 +29,12 @@ class WpnPokerStrategyService extends BaseParser {
     for (const section of sections) {
       this.initHandData();
       const lines = section.split('\n');
-      let lineData = this.wpnSectionParser(lines);
+
+      console.log(lines[0]);
+
+      let heroString = lines.filter((item: any) => item.includes("Dealt to")).length > 0 && lines.filter((item: any) => item.includes("Dealt to"))[0].split(" ")[2]
+
+      let lineData = this.wpnSectionParser(section, heroString);
       if (lineData) {
         data.data.push(lineData);
         data.parsedNumber++;
@@ -42,8 +48,7 @@ class WpnPokerStrategyService extends BaseParser {
 
   parsePokerHand(line: string) {
     const handIdRegex = /^Game Hand #([0-9]+)/;
-    const tournamentIdRegex =
-      /^Game Hand #[0-9]+ - Tournament #([0-9]+) - Holdem\(No Limit\)/;
+    const tournamentIdRegex = /^Game Hand #[0-9]+ - Tournament #([0-9]+) - Holdem\(No Limit\)/;
     const dateTimeRegex = /(\d{4}\/\d{2}\/\d{2})\s(\d+:\d+:\d+)\s(\w+)/;
     const levelRegex = /Level (\d+)/;
     const feePattern = /buyIn:\s([\d,|\d.]+)(\S)\s\+\s([\d,|\d.]+)(\S)/;
@@ -68,7 +73,7 @@ class WpnPokerStrategyService extends BaseParser {
     // date regex
     const dateTime = dateTimeRegex.exec(line);
     if (dateTime) {
-      this.handData.handDate = dateTime[1];
+      this.handData.handDate = dateTime[1] + " " + dateTime[2];
       this.handData.handTime = dateTime[2];
       this.handData.handTimezone = dateTime[3];
     }
@@ -110,7 +115,7 @@ class WpnPokerStrategyService extends BaseParser {
     }
   }
 
-  parseAction(line: string, actionFlag: string) {
+  parseAction(line: string, actionFlag: string, heroString: string) {
     // action array data
     if (actionFlag.includes('posts')) {
       // action array data
@@ -140,14 +145,14 @@ class WpnPokerStrategyService extends BaseParser {
             this.handData = {
               ...this.handData,
               smallBlindSeat: match[1]
-                ? this.findPlayerSeatNumber(match[1])
+                ? this.findPlayerSeatNumber(match[1] === heroString ? "Hero" : match[1])
                 : null,
             };
           } else if (actionType === this.actionTypes.postBigBlind) {
             this.handData = {
               ...this.handData,
               bigBlindSeat: match[1]
-                ? this.findPlayerSeatNumber(match[1])
+                ? this.findPlayerSeatNumber(match[1] === heroString ? "Hero" : match[1])
                 : null,
             };
           }
@@ -159,7 +164,7 @@ class WpnPokerStrategyService extends BaseParser {
       if (match) {
         this.handData.summary.collected.push({
           amount: parseStringFloat(match[2]),
-          playerName: this.findPlayer(match[1]),
+          playerName: this.findPlayer(match[1] === heroString ? "Hero" : match[1]),
         });
       }
     } else {
@@ -207,12 +212,12 @@ class WpnPokerStrategyService extends BaseParser {
 
           if (actionType === this.actionTypes.show) {
             this.handData.summary.shows.push({
-              playerName: match[1],
+              playerName: match[1] === heroString ? "Hero" : match[1],
               cards: this.getCardsDetail(match[2].split(' ')),
             });
           } else {
             this.handData.actions.push({
-              playerName: this.findPlayer(match[1]),
+              playerName: this.findPlayer(match[1] === heroString ? "Hero" : match[1]),
               action: __actionType,
               actionAmount: actionAmount,
               street: this.currentStreet,
@@ -281,7 +286,45 @@ class WpnPokerStrategyService extends BaseParser {
     }
   }
 
-  wpnSectionParser(chunks: string[]) {
+  checkSbCaseChip(line: string): number {
+    if (line.includes('small blind')) {
+
+      const numberPattern = /\d+\.\d+/;
+      const match = line.match(numberPattern);
+      const number = match ? match[0] : 0;
+
+      return Number(number);
+
+    } else return 0
+  }
+
+
+  checkHeroChip(line: string): number {
+
+    const numberPattern = /\d+\.\d+/;
+    const match = line.match(numberPattern);
+    const number = match ? match[0] : 0;
+
+    return Number(number);
+  }
+
+  checkReturnedChip(line: string): number {
+
+    const numberPattern = /\d+\.\d+/;
+    const match = line.match(numberPattern);
+    const number = match ? match[0] : 0;
+
+    return Number(number);
+  }
+
+  wpnSectionParser(data: any, heroString: string) {
+
+    let heroChipBeforeHole = 0
+    let returnedChip = 0
+    let sbCaseChip = 0
+
+    const chunks = data.split('\n');
+
     this.currentStreet = this.street.preFlop;
     const playerRegex = /Seat (\d+): (.+) \(([\d,|\d.]+)\)/;
     const holeCardsRegex = /Dealt to (.+) \[(.+)\]/;
@@ -302,6 +345,19 @@ class WpnPokerStrategyService extends BaseParser {
     }
 
     for (let line of chunks) {
+
+      if (line.includes('posts') && line.includes(heroString)) {
+        heroChipBeforeHole += this.checkHeroChip(line)
+        sbCaseChip = this.checkSbCaseChip(line)
+      }
+
+      if (line.includes('won') && line.includes(heroString)) {
+
+        console.log("heroString", line);
+
+        returnedChip += this.checkReturnedChip(line)
+      }
+
       if (line.includes('Hand')) {
         this.parsePokerHand(line);
       }
@@ -319,7 +375,7 @@ class WpnPokerStrategyService extends BaseParser {
           if (!line.includes('out of hand')) {
             this.handData.players.push({
               seatNumber: parseStringInt(seatNumber),
-              playerName,
+              playerName: playerName === heroString ? "Hero" : playerName,
               chipCount: parseStringFloat(chipCount),
             });
           }
@@ -330,7 +386,7 @@ class WpnPokerStrategyService extends BaseParser {
       const holeCards = holeCardsRegex.exec(line);
       if (holeCards) {
         this.handData.holeCards.push({
-          playerName: holeCards[1],
+          playerName: holeCards[1] === heroString ? "Hero" : holeCards[1],
           cards: this.getCardsDetail(holeCards[2].split(' ')),
         });
       }
@@ -352,9 +408,14 @@ class WpnPokerStrategyService extends BaseParser {
         line.includes(action),
       );
       if (actionLineFlag) {
-        this.parseAction(line, actionLineFlag);
+        this.parseAction(line, actionLineFlag, heroString);
       }
     }
+
+    this.handData.rawData = data
+    this.handData.heroChipBeforeHole = heroChipBeforeHole
+    this.handData.returnedChip = returnedChip
+    this.handData.sbCaseChip = sbCaseChip
 
     return this.handData;
   }

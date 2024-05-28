@@ -121,8 +121,18 @@ export class HandHistory {
       stackDepth: Number,
       action: [{
         category: [String],
-        villain: [],
+        villain: [{
+          position: Number,
+          villainStackDepth: Number,
+          currentVillainActionAmount: Number,
+          previousActionAmount: Number,
+          villainAction: String,
+          villainCategory: [String],
+          _id: false
+        }],
         actionAmount: Number,
+        previousBettingAmount: Number,
+        currentAction: String,
         bettingAction: {
           fold: Number,
           raise: Number,
@@ -140,8 +150,17 @@ export class HandHistory {
     stackDepth: number;
     action: {
       category: string[];
-      villain: [];
+      villain: {
+        position: number,
+        villainAction: string,
+        villainStackDepth: number,
+        currentVillainActionAmount: number,
+        previousActionAmount: number,
+        villainCategory: string[];
+      }[];
+      currentAction: string | null;
       actionAmount: number | null;
+      previousBettingAmount: number | null;
       bettingAction: {
         fold: number;
         raise: number;

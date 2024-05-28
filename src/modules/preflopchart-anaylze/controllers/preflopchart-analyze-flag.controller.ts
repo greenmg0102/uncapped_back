@@ -27,7 +27,4 @@ export class PreflopchartAnalyzeFlagController {
         return await this.preflopchartAnalyzeFlagService.getFlag(body);
     }
 
-    
-
-
 }

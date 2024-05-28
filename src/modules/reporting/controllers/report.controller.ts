@@ -6,6 +6,7 @@ import { GlobalOpportunityService } from '../services/global-opportunity.service
 import { HeroRaiseSizingService } from '../services/hero-raise-sizing.service';
 import { VillainRaiseSizingService } from '../services/villain-raise-sizing.service';
 import { RaiseSizingTableService } from '../services/raise-sizing-table.service';
+import { SqueezeRaiseSizingService } from '../services/squeeze-raise-sizing.service';
 
 @Controller('report')
 export class ReportController {
@@ -16,6 +17,7 @@ export class ReportController {
         private heroRaiseSizingService: HeroRaiseSizingService,
         private villainRaiseSizingService: VillainRaiseSizingService,
         private raiseSizingTableService: RaiseSizingTableService,
+        private squeezeRaiseSizingService: SqueezeRaiseSizingService,
     ) { }
 
     @Post('/collections')
@@ -70,7 +72,6 @@ export class ReportController {
             ...body,
             userId: userId
         }
-
         return await this.reportGeneratorService.userHandInfo(bufferBody)
     }
 
@@ -114,7 +115,6 @@ export class ReportController {
             ...body,
             userId: userId
         }
-
         return await this.globalOpportunityService.eachActionPosition(bufferBody)
     }
 
@@ -130,7 +130,6 @@ export class ReportController {
             ...body,
             userId: userId
         }
-
         return await this.heroRaiseSizingService.extractingHeroRaisingTable(bufferBody)
     }
 
@@ -146,8 +145,22 @@ export class ReportController {
             ...body,
             userId: userId
         }
-
         return await this.villainRaiseSizingService.extractingVillainRaisingTable(bufferBody)
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post('/raise-sizing/squeeze')
+    @HttpCode(200)
+    async extractingSquuezeRaisingTable(@Req() req: Request, @Body() body): Promise<any> {
+
+        const user: any = req.user;
+        const userId = user.sub._id;
+
+        let bufferBody = {
+            ...body,
+            userId: userId
+        }
+        return await this.squeezeRaiseSizingService.extractingSqueezeRaisingTable(bufferBody)
     }
 
 
@@ -163,7 +176,6 @@ export class ReportController {
             ...body,
             userId: userId
         }
-
         return await this.raiseSizingTableService.raisingSizeTabelExtracting(bufferBody)
     }
 

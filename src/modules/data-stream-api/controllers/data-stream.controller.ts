@@ -61,6 +61,7 @@ export class DataStreamController {
         const sections: string[] = fileContent.split(/\n\s*(?:\n\s*){1,3}/);
 
         const roomType = this.roomDetection.identifyRoom(sections[0]);
+
         const strategyService = this.roomStrategyFactory.createStrategy(roomType);
 
         const user: any = request.user;
@@ -68,6 +69,7 @@ export class DataStreamController {
 
         if (strategyService) {
           data = await strategyService.parse(sections);
+          
           this.handModelService
             .saveHistory(data.data, roomType, userId)
             .then((res: any) => {
@@ -115,7 +117,7 @@ export class DataStreamController {
       const readableStream = request as unknown as Readable;
       const longStringPromise = new Promise<string>((resolve, reject) => {
 
-        const chunks: Buffer[] = []; // Use Buffer instead of Uint8Array
+        const chunks: Buffer[] = [];
 
         readableStream.on('data', (chunk: Buffer) => {
           chunks.push(chunk);
@@ -148,15 +150,19 @@ export class DataStreamController {
         const fileContent = file;
         const sections: string[] = fileContent.split(/\n\s*(?:\n\s*){1,3}/);
         const roomType = this.roomDetection.identifyRoom(sections[0]);
+
         if (roomType === this.roomType.noType) wrongFiles++;
         else correctFiles++;
 
         const strategyService = this.roomStrategyFactory.createStrategy(roomType);
-        if (strategyService) {
 
+        if (strategyService) {
+          
           let data: ParsedReturnData = await strategyService.parse(sections);
+
           const user: any = request.user;
           const userId = user.sub._id;
+
           await this.handModelService
             .saveHistory(data.data, roomType, userId)
             .then((res: any) => {

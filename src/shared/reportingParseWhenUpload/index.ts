@@ -1,7 +1,9 @@
 import { reportingParseGG } from 'src/shared/reportingParseWhenUpload/gg'
 
 export default async function reportingParse(pokerRoomId: any, players: any, actions: any, bigBlind: any, buttonSeat: any): Promise<any> {
-    if (pokerRoomId === "GGPoker") return await reportingParseGG(players, actions, bigBlind, buttonSeat)
+
+    // if (pokerRoomId === "GGPoker") 
+    return await reportingParseGG(players, actions, bigBlind, buttonSeat)
 }
 
 export function calculatingPosition(currentPosition: any, tableStandard: any, buttonSeat: any): any {

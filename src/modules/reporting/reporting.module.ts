@@ -16,6 +16,8 @@ import { ReportScatterService } from './services/report-scatter.service';
 import { HeroRaiseSizingService } from './services/hero-raise-sizing.service';
 import { VillainRaiseSizingService } from './services/villain-raise-sizing.service';
 import { RaiseSizingTableService } from './services/raise-sizing-table.service';
+import { SqueezeRaiseSizingService } from './services/squeeze-raise-sizing.service';
+import { ReportGlobalStatisticService } from './services/report-global-statistic.service';
 
 
 import { ReportUserGeneratingService } from './services/report-user-generating';
@@ -41,6 +43,7 @@ import { HandHistory, HandHistorySchema } from '../database-storage/schemas/hand
     ReportGeneratorService,
     ReportMacdHandsService,
     ReportMacdOffSuitedService,
+    ReportGlobalStatisticService,
     ReportMacdAllinbb100Service,
     ReportMacdBBService,
     ReportMacdDateService,
@@ -55,7 +58,8 @@ import { HandHistory, HandHistorySchema } from '../database-storage/schemas/hand
     ReportScatterService,
     HeroRaiseSizingService,
     VillainRaiseSizingService,
-    RaiseSizingTableService
+    RaiseSizingTableService,
+    SqueezeRaiseSizingService
   ]
 })
 export class ReportingModule { }

@@ -18,8 +18,6 @@ export class VillainRaiseSizingService {
       'Deep Stack': [60, 80, 100]
     }
 
-    let bufferTableSeat = body.tableSize === '2~10' ? [2, 3, 4, 5, 6, 7, 8, 9, 10] : [body.tableSize]
-
     let matchObj = {
       userId: new mongoose.Types.ObjectId(body.userId),
       "reportDetail.action": {
@@ -27,13 +25,13 @@ export class VillainRaiseSizingService {
           villain: {
             $elemMatch: {
               villainCategory: { $in: [body.actionType] },
-              villainStackDepth: { $in: stackDepthBucket[body.stackDepth] },
             }
           },
         }
       },
+      "reportDetail.stackDepth": { $in: stackDepthBucket[body.stackDepth] },
       pokerRoomId: body.pokerType,
-      maxTableSeats: { $in: bufferTableSeat },
+      maxTableSeats: body.tableSize,
       date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) }
     };
 
@@ -49,62 +47,45 @@ export class VillainRaiseSizingService {
                   input: "$reportDetail.action",
                   as: "action",
                   in: {
-                    $filter: {
+                    // $cond: {
+                    //   if: {
+                    //     $and: [
+                    //       { $eq: ["$$action.currentAction", "raise"] },
+                    //       { $gte: [{ $divide: ["$$action.actionAmount", "$bigBlind"] }, 2.0] },
+                    //       { $lt: [{ $divide: ["$$action.actionAmount", "$bigBlind"] }, 2.49] },
+                    //     ]
+                    //   },
+                    //   then: "$$action",
+                    //   else: null
+                    // }
+
+                    $map: {
                       input: "$$action.villain",
                       as: "villainAction",
-                      cond: {
-                        $and: [
-                          { $gte: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 1.99] },
-                          { $lt: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 2.49] }
-                        ]
+                      in: {
+                        $cond: {
+                          if: {
+                            $and: [
+                              // { $eq: ["$$action.currentAction", "raise"] },
+                              { $gte: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 2.0] },
+                              { $lt: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 2.49] },
+                            ]
+                          },
+                          then: "$$action",
+                          else: null
+                        }
+
                       }
                     }
                   }
                 }
               },
               as: "filteredAction",
-              cond: { $ne: ["$$filteredAction", []] }
+              cond: { $ne: ["$$filteredAction", null] }
             }
           }
         }
       },
-
-      // '2bb': {
-      //   $sum: {
-      //     $size: {
-      //       $filter: {
-      //         input: {
-      //           $map: {
-      //             input: "$reportDetail.action",
-      //             as: "action",
-      //             in: {
-      //               $map: {
-      //                 input: "$$action.villain",
-      //                 as: "villainAction",
-      //                 in: {
-      //                   $cond: {
-      //                     if: {
-      //                       $and: [
-      //                         // { $eq: ["$$villainAction.villainAction", "raise"] },
-      //                         { $gte: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 1.99] },
-      //                         { $lt: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 2.49] },
-      //                       ]
-      //                     },
-      //                     then: "$$villainAction",
-      //                     else: null
-      //                   }
-
-      //                 }
-      //               }
-      //             }
-      //           }
-      //         },
-      //         as: "filteredAction",
-      //         cond: { $ne: ["$$filteredAction", null] }
-      //       }
-      //     }
-      //   }
-      // },
       '25bb': {
         $sum: {
           $size: {
@@ -114,21 +95,22 @@ export class VillainRaiseSizingService {
                   input: "$reportDetail.action",
                   as: "action",
                   in: {
-                    $filter: {
-                      input: "$$action.villain",
-                      as: "villainAction",
-                      cond: {
+                    $cond: {
+                      if: {
                         $and: [
-                          { $gte: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 2.5] },
-                          { $lt: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 2.99] }
+                          { $eq: ["$$action.currentAction", "raise"] },
+                          { $gte: [{ $divide: ["$$action.actionAmount", "$bigBlind"] }, 2.5] },
+                          { $lt: [{ $divide: ["$$action.actionAmount", "$bigBlind"] }, 2.99] }
                         ]
-                      }
+                      },
+                      then: "$$action",
+                      else: null
                     }
                   }
                 }
               },
               as: "filteredAction",
-              cond: { $ne: ["$$filteredAction", []] }
+              cond: { $ne: ["$$filteredAction", null] }
             }
           }
         }
@@ -142,21 +124,22 @@ export class VillainRaiseSizingService {
                   input: "$reportDetail.action",
                   as: "action",
                   in: {
-                    $filter: {
-                      input: "$$action.villain",
-                      as: "villainAction",
-                      cond: {
+                    $cond: {
+                      if: {
                         $and: [
-                          { $gte: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 3.0] },
-                          { $lt: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 3.49] }
+                          { $eq: ["$$action.currentAction", "raise"] },
+                          { $gte: [{ $divide: ["$$action.actionAmount", "$bigBlind"] }, 3.0] },
+                          { $lt: [{ $divide: ["$$action.actionAmount", "$bigBlind"] }, 3.49] }
                         ]
-                      }
+                      },
+                      then: "$$action",
+                      else: null
                     }
                   }
                 }
               },
               as: "filteredAction",
-              cond: { $ne: ["$$filteredAction", []] }
+              cond: { $ne: ["$$filteredAction", null] }
             }
           }
         }
@@ -170,21 +153,22 @@ export class VillainRaiseSizingService {
                   input: "$reportDetail.action",
                   as: "action",
                   in: {
-                    $filter: {
-                      input: "$$action.villain",
-                      as: "villainAction",
-                      cond: {
+                    $cond: {
+                      if: {
                         $and: [
-                          { $gte: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 3.5] },
-                          { $lt: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 3.99] }
+                          { $eq: ["$$action.currentAction", "raise"] },
+                          { $gte: [{ $divide: ["$$action.actionAmount", "$bigBlind"] }, 3.5] },
+                          { $lt: [{ $divide: ["$$action.actionAmount", "$bigBlind"] }, 3.99] }
                         ]
-                      }
+                      },
+                      then: "$$action",
+                      else: null
                     }
                   }
                 }
               },
               as: "filteredAction",
-              cond: { $ne: ["$$filteredAction", []] }
+              cond: { $ne: ["$$filteredAction", null] }
             }
           }
         }
@@ -198,21 +182,22 @@ export class VillainRaiseSizingService {
                   input: "$reportDetail.action",
                   as: "action",
                   in: {
-                    $filter: {
-                      input: "$$action.villain",
-                      as: "villainAction",
-                      cond: {
+                    $cond: {
+                      if: {
                         $and: [
-                          { $gte: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 4.0] },
-                          { $lt: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 4.49] }
+                          { $eq: ["$$action.currentAction", "raise"] },
+                          { $gte: [{ $divide: ["$$action.actionAmount", "$bigBlind"] }, 4.0] },
+                          { $lt: [{ $divide: ["$$action.actionAmount", "$bigBlind"] }, 4.49] }
                         ]
-                      }
+                      },
+                      then: "$$action",
+                      else: null
                     }
                   }
                 }
               },
               as: "filteredAction",
-              cond: { $ne: ["$$filteredAction", []] }
+              cond: { $ne: ["$$filteredAction", null] }
             }
           }
         }
@@ -226,21 +211,22 @@ export class VillainRaiseSizingService {
                   input: "$reportDetail.action",
                   as: "action",
                   in: {
-                    $filter: {
-                      input: "$$action.villain",
-                      as: "villainAction",
-                      cond: {
+                    $cond: {
+                      if: {
                         $and: [
-                          { $gte: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 4.5] },
-                          { $lt: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 4.99] }
+                          { $eq: ["$$action.currentAction", "raise"] },
+                          { $gte: [{ $divide: ["$$action.actionAmount", "$bigBlind"] }, 4.5] },
+                          { $lt: [{ $divide: ["$$action.actionAmount", "$bigBlind"] }, 5.0] }
                         ]
-                      }
+                      },
+                      then: "$$action",
+                      else: null
                     }
                   }
                 }
               },
               as: "filteredAction",
-              cond: { $ne: ["$$filteredAction", []] }
+              cond: { $ne: ["$$filteredAction", null] }
             }
           }
         }
@@ -254,24 +240,26 @@ export class VillainRaiseSizingService {
                   input: "$reportDetail.action",
                   as: "action",
                   in: {
-                    $filter: {
-                      input: "$$action.villain",
-                      as: "villainAction",
-                      cond: {
+                    $cond: {
+                      if: {
                         $and: [
-                          { $gt: [{ $divide: ["$$villainAction.currentVillainActionAmount", "$bigBlind"] }, 5.0] }
+                          { $eq: ["$$action.currentAction", "raise"] },
+                          { $gte: [{ $divide: ["$$action.actionAmount", "$bigBlind"] }, 5.01] }
                         ]
-                      }
+                      },
+                      then: "$$action",
+                      else: null
                     }
                   }
                 }
               },
               as: "filteredAction",
-              cond: { $ne: ["$$filteredAction", []] }
+              cond: { $ne: ["$$filteredAction", null] }
             }
           }
         }
       },
+
     };
 
     let unwindObj1 = {
@@ -300,8 +288,6 @@ export class VillainRaiseSizingService {
         }
       }
     ]);
-
-    console.log("statistics", statistics);
 
     const result = Object.values(statistics.reduce((acc: any, item: any) => {
       const id = item._id;

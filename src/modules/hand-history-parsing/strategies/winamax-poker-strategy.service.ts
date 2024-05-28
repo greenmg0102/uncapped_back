@@ -13,6 +13,7 @@ class WinamaxPokerStrategyService extends BaseParser {
   }
 
   parse(sections: string[]): ParsedReturnData {
+
     let data: ParsedReturnData = {
       data: [],
       parsedNumber: 0,
@@ -26,9 +27,15 @@ class WinamaxPokerStrategyService extends BaseParser {
     };
 
     for (const section of sections) {
+
       this.initHandData();
+
       const lines = section.split('\n');
-      let lineData = this.winamaxSectionParser(lines);
+
+      let heroString = lines.filter((item: any) => item.includes("Dealt to")).length > 0 && lines.filter((item: any) => item.includes("Dealt to"))[0].split(" ")[2]
+
+      let lineData = this.winamaxSectionParser(section, heroString);
+
       if (lineData) {
         data.data.push(lineData);
         data.parsedNumber++;
@@ -67,7 +74,7 @@ class WinamaxPokerStrategyService extends BaseParser {
     // date regex
     const dateTime = dateTimeRegex.exec(line);
     if (dateTime) {
-      this.handData.handDate = dateTime[1];
+      this.handData.handDate = dateTime[1] + " " + dateTime[2];
       this.handData.handTime = dateTime[2];
       this.handData.handTimezone = dateTime[3];
     }
@@ -110,7 +117,7 @@ class WinamaxPokerStrategyService extends BaseParser {
     }
   }
 
-  parseAction(line: string, actionFlag: string) {
+  parseAction(line: string, actionFlag: string, heroString: string) {
     // action array data
     if (actionFlag.includes('posts')) {
       // action array data
@@ -159,7 +166,7 @@ class WinamaxPokerStrategyService extends BaseParser {
       if (match) {
         this.handData.summary.collected.push({
           amount: parseStringFloat(match[2]),
-          playerName: this.findPlayer(match[1]),
+          playerName: this.findPlayer(match[1] === heroString ? "Hero" : match[1]),
         });
       }
     } else {
@@ -207,12 +214,12 @@ class WinamaxPokerStrategyService extends BaseParser {
 
           if (actionType === this.actionTypes.show) {
             this.handData.summary.shows.push({
-              playerName: match[1],
+              playerName: match[1] === heroString ? "Hero" : match[1],
               cards: this.getCardsDetail(match[2].split(' ')),
             });
           } else {
             this.handData.actions.push({
-              playerName: this.findPlayer(match[1]),
+              playerName: this.findPlayer(match[1] === heroString ? "Hero" : match[1]),
               action: __actionType,
               actionAmount: actionAmount,
               street: this.currentStreet,
@@ -271,7 +278,44 @@ class WinamaxPokerStrategyService extends BaseParser {
       });
   }
 
-  winamaxSectionParser(chunks: string[]) {
+  checkSbCaseChip(line: string): number {
+    if (line.includes('small blind')) {
+
+      const numberPattern = /(\d+)/;
+      const match = line.match(numberPattern);
+      const number = match ? match[1].replace(/,/g, '') : 0;
+
+      return Number(number);
+
+    } else return 0
+  }
+  
+
+  checkHeroChip(line: string): number {
+
+    const numberPattern = /(\d+)/;
+    const match = line.match(numberPattern);
+    const number = match ? match[1].replace(/,/g, '') : 0;
+
+    return Number(number);
+  }
+
+  checkReturnedChip(line: string): number {
+    const numberPattern = /(\d+)/;
+    const match = line.match(numberPattern);
+    const number = match ? match[1].replace(/,/g, '') : 0;
+
+    return Number(number);
+  }
+
+  winamaxSectionParser(data: any, heroString: string) {
+
+    let heroChipBeforeHole = 0
+    let returnedChip = 0
+    let sbCaseChip = 0
+
+    const chunks = data.split('\n');
+
     this.currentStreet = this.street.preFlop;
     const playerRegex =
       /Seat (\d+): (.+) \(([\d,|\d.]+)(?:, ([\d,|\d.]+)\S bounty)?\)/;
@@ -292,6 +336,17 @@ class WinamaxPokerStrategyService extends BaseParser {
     }
 
     for (let line of chunks) {
+
+      if (line.includes('posts') && line.includes(heroString)) {
+        heroChipBeforeHole += this.checkHeroChip(line)
+        sbCaseChip = this.checkSbCaseChip(line)
+      }
+
+      if (line.includes('won') && line.includes(heroString)) {
+        returnedChip += this.checkReturnedChip(line)
+      }
+
+
       if (line.includes('Hand')) {
         this.parsePokerHand(line);
       }
@@ -309,7 +364,7 @@ class WinamaxPokerStrategyService extends BaseParser {
           if (!line.includes('out of hand')) {
             this.handData.players.push({
               seatNumber: parseStringInt(seatNumber),
-              playerName,
+              playerName: playerName === heroString ? "Hero" : playerName,
               chipCount: parseStringFloat(chipCount),
             });
           }
@@ -320,7 +375,7 @@ class WinamaxPokerStrategyService extends BaseParser {
       const holeCards = holeCardsRegex.exec(line);
       if (holeCards) {
         this.handData.holeCards.push({
-          playerName: holeCards[1],
+          playerName: holeCards[1] === heroString ? "Hero" : holeCards[1],
           cards: this.getCardsDetail(holeCards[2].split(' ')),
         });
       }
@@ -341,9 +396,14 @@ class WinamaxPokerStrategyService extends BaseParser {
         line.includes(action),
       );
       if (actionLineFlag) {
-        this.parseAction(line, actionLineFlag);
+        this.parseAction(line, actionLineFlag, heroString);
       }
     }
+
+    this.handData.rawData = data
+    this.handData.heroChipBeforeHole = heroChipBeforeHole
+    this.handData.returnedChip = returnedChip
+    this.handData.sbCaseChip = sbCaseChip
 
     return this.handData;
   }

@@ -10,6 +10,7 @@ export class IgnitionPokerStrategyService extends BaseParser {
   }
 
   parse(sections: string[]): ParsedReturnData {
+    
     let data: ParsedReturnData = {
       data: [],
       parsedNumber: 0,
@@ -22,9 +23,13 @@ export class IgnitionPokerStrategyService extends BaseParser {
       rejectedOther: 0,
     };
     for (const section of sections) {
+
       this.initHandData();
+
       const lines = section.split('\n');
-      let lineData = this.ignitionPokerSectionParser(lines);
+
+      let lineData = this.ignitionPokerSectionParser(section);
+
       if (lineData) {
         data.data.push(lineData);
         data.parsedNumber++;
@@ -44,6 +49,7 @@ export class IgnitionPokerStrategyService extends BaseParser {
       actionFlag.includes('Big blind')
     ) {
       // action array data
+
       const actionRegexMap = new Map<string, RegExp>([
         [this.actionTypes.postAnte, /^(.+) : Ante chip (\d+)/],
         [this.actionTypes.postSmallBlind, /^(.+) : Small blind (\d+)/],
@@ -53,18 +59,26 @@ export class IgnitionPokerStrategyService extends BaseParser {
       ]);
 
       for (const [actionType, regex] of actionRegexMap.entries()) {
+
         const match = line.match(regex);
 
         if (match) {
+
           if (actionType === this.actionTypes.postAnte && !this.handData.ante) {
             this.handData = {
               ...this.handData,
               ante: parseStringInt(match[2]),
             };
+          } else {
+            this.handData = {
+              ...this.handData,
+              ante: 0,
+            };
           }
         }
       }
     } else {
+
       const summaryActionRegexMap = new Map<string, RegExp>([
         [this.actionTypes.fold, /^(.+) : Folds/],
         [this.actionTypes.raise, /^(.+) : Raises (?:\d+) to (\d+)/],
@@ -103,12 +117,13 @@ export class IgnitionPokerStrategyService extends BaseParser {
 
           if (actionType === this.actionTypes.show) {
             this.handData.summary.shows.push({
-              playerName: match[1],
-              cards: this.findPlayerCards(match[1]),
+              playerName: match[1].includes("ME") ? "Hero" : match[1],
+              cards: this.findPlayerCards(match[1].includes("ME") ? "Hero" : match[1]),
             });
           } else {
+
             this.handData.actions.push({
-              playerName: this.findPlayer(match[1]),
+              playerName: this.findPlayer(match[1].includes("ME") ? "Hero" : match[1]),
               action: __actionType,
               actionAmount: actionAmount,
               street: this.currentStreet,
@@ -123,7 +138,7 @@ export class IgnitionPokerStrategyService extends BaseParser {
   parsePokerHand(line: string): void {
     const handIdRegex = /Hand #(\d+)/;
     const tournamentIdRegex = /Tournament #(\d+)/;
-    const dateTimeRegex = /(\d{4}\-\d{2}\-\d{2})\s(\d{2}:\d{2}:\d{2})\s(\w+)/;
+    const dateTimeRegex = /(\d{4}-\d{2}-\d{2})\s(\d{2}:\d{2}:\d{2})\s?(\w+)?/;
     const levelRegex = /Level (\S+)/;
     const feePattern = /\$(\d+\.\d+)\+\$(\d+\.\d+)/;
     const blindRegex = /Level \w+ \((\d+)\/(\d+)\)/;
@@ -139,6 +154,8 @@ export class IgnitionPokerStrategyService extends BaseParser {
 
     // tournament ID
     const tournamentId = tournamentIdRegex.exec(line);
+
+
     if (tournamentId) {
       this.handData.tournamentId = parseStringInt(tournamentId[1]);
       this.handData.gameFormat = 'Tournament';
@@ -147,13 +164,15 @@ export class IgnitionPokerStrategyService extends BaseParser {
 
     // date regex
     const dateTime = dateTimeRegex.exec(line);
+
     if (dateTime) {
-      this.handData.handDate = dateTime[1];
+      this.handData.handDate = dateTime[1] + " " + dateTime[2];
       this.handData.handTime = dateTime[2];
       this.handData.handTimezone = dateTime[3];
     }
 
     const regionalMatch = line.match(regionalRegex);
+
     if (regionalMatch) {
       this.handData.regionalHandDate = regionalMatch[1];
       this.handData.regionalHandTime = regionalMatch[2];
@@ -180,6 +199,7 @@ export class IgnitionPokerStrategyService extends BaseParser {
 
     //  Tournament BuyIn & Fee
     const feeMatch = line.match(feePattern);
+
     if (feeMatch) {
       this.handData.wagerType = '$';
       this.handData.tournamentBuyIn = parseFloat(feeMatch[1]);
@@ -194,6 +214,7 @@ export class IgnitionPokerStrategyService extends BaseParser {
     if (tableInfoMatch) {
       const [_, tableNumber, tournamentSpeed] = tableInfoMatch;
 
+
       this.handData = {
         ...this.handData,
         tournamentTableNumber: isNaN(Number(tableNumber))
@@ -207,7 +228,7 @@ export class IgnitionPokerStrategyService extends BaseParser {
     const gameMatch = line.match(gamePattern);
     if (gameMatch) {
       this.handData.pokerForm = gameMatch[1];
-      this.handData.pokerType = 'No Limit';
+      this.handData.pokerType = null;  // 'No Limit'
     }
   }
 
@@ -275,18 +296,55 @@ export class IgnitionPokerStrategyService extends BaseParser {
       ...this.handData.summary,
       collected: totalPlotMatch
         ? [
-            ...this.handData.summary.collected,
-            {
-              playerName: totalPlotMatch[1],
-              amount: parseStringInt(totalPlotMatch[2]),
-            },
-          ]
+          ...this.handData.summary.collected,
+          {
+            playerName: totalPlotMatch[1].includes("ME") ? "Hero" : totalPlotMatch[1],
+            amount: parseStringInt(totalPlotMatch[2]),
+          },
+        ]
         : this.handData.summary.collected,
     };
   }
 
-  ignitionPokerSectionParser(chunks: string[]) {
+  checkSbCaseChip(line: string): number {
+    if (line.includes('Small blind')) {
+      const numberPattern = /\b\d+\b/;
+      return Number(line.match(numberPattern)[0]);
+    } else return 0
+  }
+
+  checkHeroChip(line: string): number {
+    const numberPattern = /\b\d+\b/;
+    return Number(line.match(numberPattern)[0]);
+  }
+
+  checkReturnedChip(line: string): number {
+    const regex = /[\d,]+/;
+    const match = line.match(regex);
+
+    if (match) {
+
+      const extractedNumber = match[0];
+      const numberWithoutComma = extractedNumber.replace(/,/g, '');
+      const number = parseInt(numberWithoutComma, 10);
+
+      return number
+    } else {
+      console.log("No number found in the input string.");
+      return 0
+    }
+  }
+
+  ignitionPokerSectionParser(data: string) {
+
+    let heroChipBeforeHole = 0
+    let returnedChip = 0
+    let sbCaseChip = 0
+
+    const chunks = data.split('\n');
+
     this.currentStreet = this.street.preFlop;
+
     const playerRegex = /Seat (\d+): (.+) \((\d+|\d{1,3},\d{3}) in chips\)/;
     const holeCardsRegex = /(.+) : Card dealt to a spot \[(.+)\]/;
     const muckRegex = /(.+) : (?:Does not show|Mucks) \[(.+)\] \((.+)\)/;
@@ -306,6 +364,16 @@ export class IgnitionPokerStrategyService extends BaseParser {
     }
 
     for (let line of chunks) {
+
+      if ((line.includes('Small blind') || (line.includes('Big blind'))) && line.includes('[ME]')) {
+        heroChipBeforeHole += this.checkHeroChip(line)
+        sbCaseChip = this.checkSbCaseChip(line)
+      }
+
+      if (line.includes('Hand Result') && line.includes('[ME]')) {
+        returnedChip += this.checkReturnedChip(line)
+      }
+
       if (line.includes('Hand')) {
         this.parsePokerHand(line);
       }
@@ -314,21 +382,24 @@ export class IgnitionPokerStrategyService extends BaseParser {
       const players = line.match(new RegExp(playerRegex, 'g'));
       if (players) {
         players.forEach((player: any) => {
-          const [, seatNumber, playerName, chipCount]: any =
-            playerRegex.exec(player);
+          const [, seatNumber, playerName, chipCount]: any = playerRegex.exec(player);
+
           this.handData.players.push({
             seatNumber: parseStringInt(seatNumber),
-            playerName,
+            playerName: playerName.includes("ME") ? "Hero" : playerName,
+            // playerName.includes("ME")? "Hero": playerName,
             chipCount: parseStringInt(chipCount),
           });
+
         });
       }
 
       // Extract hole cards
       const holeCards = holeCardsRegex.exec(line);
+
       if (holeCards) {
         this.handData.holeCards.push({
-          playerName: holeCards[1],
+          playerName: holeCards[1].includes("ME") ? "Hero" : holeCards[1],
           cards: this.getCardsDetail(holeCards[2].split(' ')),
         });
       }
@@ -344,9 +415,10 @@ export class IgnitionPokerStrategyService extends BaseParser {
 
       //  Extract Mucks
       const mucks = muckRegex.exec(line);
+
       if (mucks) {
         this.handData.summary.mucks.push({
-          playerName: mucks[1],
+          playerName: mucks[1].includes("ME") ? "Hero" : mucks[1],
           cards: this.getCardsDetail(mucks[2].split(' ')),
         });
       }
@@ -367,13 +439,17 @@ export class IgnitionPokerStrategyService extends BaseParser {
         'All-in',
         'Showdown',
       ];
-      const actionLineFlag = actionNames.find((action: string) =>
-        line.includes(action),
-      );
+      const actionLineFlag = actionNames.find((action: string) => line.includes(action));
+
       if (actionLineFlag) {
         this.parseAction(line, actionLineFlag);
       }
     }
+
+    this.handData.rawData = data
+    this.handData.heroChipBeforeHole = heroChipBeforeHole
+    this.handData.returnedChip = returnedChip
+    this.handData.sbCaseChip = sbCaseChip
 
     return this.handData;
   }

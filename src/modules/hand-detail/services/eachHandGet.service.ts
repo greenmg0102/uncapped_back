@@ -44,7 +44,6 @@ export class EachHandGetService {
 
   async getHands(pageData: any): Promise<any> {
 
-    
     const { pageNumber, pageSize, pokerType, tableSize, heroPosition, range, userId } = pageData;
 
     let seatNumber = this.getPlayerSeatNumber(heroPosition)
@@ -52,11 +51,13 @@ export class EachHandGetService {
     const skip = (pageNumber - 1) * pageSize;
     const limit = pageSize;
 
+    console.log("pageData", pageData);
+
     const query = {
       userId: new mongoose.Types.ObjectId(userId),
-      pokerRoomId: pokerType === "N/A" ? { $regex: new RegExp("", "i") } : pokerType,
+      pokerRoomId: pokerType === "N/A" ? { $exists: true } : pokerType,
       maxTableSeats: tableSize === "N/A" ? { $exists: true } : parseInt(tableSize),
-      "reportContent.heroPosition": seatNumber === null ? { $exists: true } : seatNumber,
+      "reportDetail.heroPosition": seatNumber === null ? { $exists: true } : seatNumber,
       // players: {
       //   $elemMatch: {
       //     seatNumber: heroPosition === "N/A" ? { $exists: true } : seatNumber,

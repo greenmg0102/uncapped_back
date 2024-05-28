@@ -38,14 +38,8 @@ class GgPokerStrategyService extends BaseParser {
     if (actionFlag.includes('posts')) {
       const actionRegexMap = new Map<string, RegExp>([
         [this.actionTypes.postAnte, /^(.+): posts the ante \$?([\d,|\d.]+)/],
-        [
-          this.actionTypes.postSmallBlind,
-          /^(.+): posts small blind \$?([\d,|\d.]+)/,
-        ],
-        [
-          this.actionTypes.postBigBlind,
-          /^(.+): posts big blind \$?([\d,|\d.]+)/,
-        ],
+        [ this.actionTypes.postSmallBlind, /^(.+): posts small blind \$?([\d,|\d.]+)/ ],
+        [ this.actionTypes.postBigBlind, /^(.+): posts big blind \$?([\d,|\d.]+)/ ],
         // [this.actionTypes.show, /^(\w+): shows (\[\w+\s+\w+\])/],
         // Add more action types and patterns as needed
       ]);
@@ -186,7 +180,7 @@ class GgPokerStrategyService extends BaseParser {
     // date regex
     const dateTime = dateTimeRegex.exec(line);
     if (dateTime) {
-      this.handData.handDate = dateTime[1];
+      this.handData.handDate = dateTime[1] + " " + dateTime[2];
       this.handData.handTime = dateTime[2];
       this.handData.handTimezone = dateTime[3];
     }
@@ -228,6 +222,7 @@ class GgPokerStrategyService extends BaseParser {
 
     // Poker Form and Type
     const gameMatch = line.match(gamePattern);
+    
     if (gameMatch) {
       this.handData.pokerForm = gameMatch[0];
       this.handData.pokerType = 'No Limit';

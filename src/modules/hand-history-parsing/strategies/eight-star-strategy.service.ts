@@ -1,5 +1,3 @@
-import { Inject } from '@nestjs/common';
-import { RoomTypes } from '../../../common/constants/common.constants';
 import { BaseParser } from './base';
 import { ParsedReturnData } from '../interfaces/parser.interface';
 const { parseStringInt } = require('../../../common/utility/stringUtils');
@@ -10,6 +8,7 @@ export class EightStarStrategyService extends BaseParser {
   }
 
   parse(sections: string[]): ParsedReturnData {
+
     let data: ParsedReturnData = {
       data: [],
       parsedNumber: 0,
@@ -25,8 +24,13 @@ export class EightStarStrategyService extends BaseParser {
     // check for each hands
     for (const section of sections) {
       this.initHandData();
+
       const lines = section.split('\n');
-      let lineData = this.eightPokerSectionParser(lines);
+
+      let heroString = lines.filter((item: any) => item.includes("Dealt to")).length > 0 && lines.filter((item: any) => item.includes("Dealt to"))[0].split(" ")[2]
+
+      let lineData = this.eightPokerSectionParser(section, heroString);
+
       if (lineData) {
         data.data.push(lineData);
         data.parsedNumber++;
@@ -36,10 +40,48 @@ export class EightStarStrategyService extends BaseParser {
       }
     }
 
+    // console.log("data", data);
+
     return data;
   }
 
-  eightPokerSectionParser(chunks: string[]) {
+  checkSbCaseChip(line: string): number {
+    if (line.includes('small blind')) {
+      const numberPattern = /\[(\d+)\]/;
+      const match = line.match(numberPattern);
+      const number = match ? match[1].replace(/,/g, '') : 0;
+
+      return Number(number);
+    } else return 0
+  }
+
+  checkHeroChip(line: string): number {
+
+    const numberPattern = /\[(\d+)\]/;
+    const match = line.match(numberPattern);
+    const number = match ? match[1].replace(/,/g, '') : 0;
+
+    return Number(number);
+  }
+
+  checkReturnedChip(line: string): number {
+
+    const numberPattern = /\[(\d+)\]/;
+    const match = line.match(numberPattern);
+    const number = match ? match[1].replace(/,/g, '') : 0;
+
+    return Number(number);
+
+  }
+
+  eightPokerSectionParser(data: any, heroString: string) {
+
+    let heroChipBeforeHole = 0
+    let returnedChip = 0
+    let sbCaseChip = 0
+
+    const chunks = data.split('\n');
+
     let street = null;
     let players = [];
 
@@ -47,17 +89,30 @@ export class EightStarStrategyService extends BaseParser {
     const parseRegex = /^(\*{5} 888poker)(?=.+)/;
     const emptyLine = emptyRegex.exec(chunks[0]);
     const parseMatch = chunks[1] ? parseRegex.exec(chunks[1]) : null;
+
     if (!emptyLine || !parseMatch) {
       return null;
     }
 
     for (let line of chunks) {
+
+      if (line.includes('posts') && line.includes(heroString)) {
+        heroChipBeforeHole += this.checkHeroChip(line)
+        sbCaseChip = this.checkSbCaseChip(line)
+      }
+
+      if (line.includes('collected') && line.includes(heroString)) {
+        returnedChip += this.checkReturnedChip(line)
+      }
+
+
       // Identify game Basic Info
       const gameBasicregex = /Blinds\s(No Limit|Limit)\s(.*?)\s-\s/;
       const gameBasicmatch = line.match(gameBasicregex);
       if (gameBasicmatch) {
         this.handData.pokerType = gameBasicmatch[1];
         this.handData.pokerForm = gameBasicmatch[2];
+
       }
 
       // Identify game Id
@@ -124,12 +179,16 @@ export class EightStarStrategyService extends BaseParser {
       const currentSeat = currentSeatNumber
         ? parseInt(currentSeatNumber[1])
         : null;
+
+
       if (currentSeat) {
         this.handData.buttonSeat = currentSeat;
       }
 
       const playerInfoRegex = /Seat (\d+): (.+?) \(\s*([\d,]+)\s*\)/;
       const match = line.match(playerInfoRegex);
+
+
       if (match) {
         const seatNumber = match[1];
         const playerName = match[2];
@@ -137,9 +196,10 @@ export class EightStarStrategyService extends BaseParser {
 
         const player = {
           seatNumber: parseInt(seatNumber),
-          playerName: playerName,
+          playerName: playerName === heroString ? "Hero" : playerName,
           chipCount: parseInt(chipCount),
         };
+
         this.handData.players.push(player);
         players.push({ ...player });
       }
@@ -162,16 +222,17 @@ export class EightStarStrategyService extends BaseParser {
         });
       }
       if (smallBlindMatch) {
+
         const playerSeat = this.handData.players.find(
-          (item) => item.playerName == smallBlindMatch[1],
+          (item) => item.playerName === (smallBlindMatch[1] === heroString ? "Hero" : smallBlindMatch[1])
         );
         players.map((item) => {
           if (item.playerName == smallBlindMatch[1] && smallBlindMatch[2]) {
-            item.chipCount =
-              item.chipCount - parseInt(smallBlindMatch[2].replace(/,/g, ''));
+            item.chipCount = item.chipCount - parseInt(smallBlindMatch[2].replace(/,/g, ''));
           }
           return item;
         });
+
         this.handData.smallBlindSeat = playerSeat.seatNumber;
         this.handData.smallBlind = parseInt(
           smallBlindMatch[2].replace(/,/g, ''),
@@ -179,7 +240,7 @@ export class EightStarStrategyService extends BaseParser {
       }
       if (bigBlindMatch) {
         const playerSeat = this.handData.players.find(
-          (item) => item.playerName == bigBlindMatch[1],
+          (item) => item.playerName === (bigBlindMatch[1] === heroString ? "Hero" : bigBlindMatch[1]),
         );
         players.map((item) => {
           if (item.playerName == bigBlindMatch[1] && bigBlindMatch[2]) {
@@ -200,7 +261,7 @@ export class EightStarStrategyService extends BaseParser {
         const card2: any = handMatch[3].match(/([2-9TJQKA])([csdhepto])/);
 
         this.handData.holeCards.push({
-          playerName: handMatch[1],
+          playerName: handMatch[1] === heroString ? "Hero" : handMatch[1],
           cards: [
             { rank: card1[1], suit: card1[2] },
             { rank: card2[1], suit: card2[2] },
@@ -230,21 +291,23 @@ export class EightStarStrategyService extends BaseParser {
       const streetStatus = line.match(streetRegex);
       if (streetStatus) {
         const phrase = streetStatus[0];
-        const capitalizedPhrase =
-          phrase.charAt(0).toUpperCase() + phrase.slice(1);
+        const capitalizedPhrase = phrase.charAt(0).toUpperCase() + phrase.slice(1);
         street = capitalizedPhrase == 'Down' ? 'preFlop' : capitalizedPhrase;
       }
 
       // Actions
-      const actionRegex =
-        /(.+?) (calls|checks|folds|raises|bets)(?: \[([\d,]+)\])?/g;
+      const actionRegex = /(.+?) (calls|checks|folds|raises|bets)(?: \[([\d,]+)\])?/g;
+
       let actionMatch;
+
       while ((actionMatch = actionRegex.exec(line)) !== null) {
         let checkValue = false;
+
         players.map((item) => {
-          if (item.playerName == actionMatch[1] && actionMatch[3]) {
-            item.chipCount =
-              item.chipCount - parseInt(actionMatch[3].replace(/,/g, ''));
+          if (item.playerName === (actionMatch[1] === heroString ? "Hero" : actionMatch[1]) && actionMatch[3]) {
+
+            item.chipCount = item.chipCount - parseInt(actionMatch[3].replace(/,/g, ''));
+
             if (item.chipCount == 0) {
               checkValue = true;
             }
@@ -252,7 +315,7 @@ export class EightStarStrategyService extends BaseParser {
           return item;
         });
         this.handData.actions.push({
-          playerName: actionMatch[1],
+          playerName: actionMatch[1] === heroString ? "Hero" : actionMatch[1],
           action: checkValue ? `${actionMatch[2]} all-in` : actionMatch[2],
           actionAmount: actionMatch[3]
             ? parseInt(actionMatch[3].replace(/,/g, ''))
@@ -266,7 +329,7 @@ export class EightStarStrategyService extends BaseParser {
         /(.+) shows \[ ([2-9TJQKA][cdhsepto]), ([2-9TJQKA][cdhsepto]) \]/;
       const matchShow = line.match(showRegex);
       if (matchShow) {
-        const player = matchShow[1];
+        const player = matchShow[1] === heroString ? "Hero" : matchShow[1];
         const rank1 = matchShow[2][0];
         const suit1 = matchShow[2][1];
         const rank2 = matchShow[3][0];
@@ -286,7 +349,7 @@ export class EightStarStrategyService extends BaseParser {
         /(.+) mucks \[ ([2-9TJQKA][cdhsepto]), ([2-9TJQKA][cdhsepto]) \]/;
       const matchMuck = line.match(muckRegex);
       if (matchMuck) {
-        const player = matchMuck[1];
+        const player = matchMuck[1] === heroString ? "Hero" : matchMuck[1];
         const rank1 = matchMuck[2][0];
         const suit1 = matchMuck[2][1];
         const rank2 = matchMuck[3][0];
@@ -306,7 +369,7 @@ export class EightStarStrategyService extends BaseParser {
       const matchCollect = line.match(collectRegex);
 
       if (matchCollect) {
-        const player = matchCollect[1];
+        const player = matchCollect[1] === heroString ? "Hero" : matchCollect[1];
         const amount = matchCollect[2].replace(/,/g, '');
         this.handData.summary.collected.push({
           playerName: player,
@@ -314,6 +377,11 @@ export class EightStarStrategyService extends BaseParser {
         });
       }
     }
+
+    this.handData.rawData = data
+    this.handData.heroChipBeforeHole = heroChipBeforeHole
+    this.handData.returnedChip = returnedChip
+    this.handData.sbCaseChip = sbCaseChip
 
     return this.handData;
   }

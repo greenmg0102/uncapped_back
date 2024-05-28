@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import userDataFrequencySort from 'src/shared/reportingParseWhenUpload/gg/userDataFrequencySort'
 import { ReportUserGeneratingService } from './report-user-generating';
+import { ReportGlobalStatisticService } from './report-global-statistic.service';
 
 import { generateFileData, sumAverage, exchangeIntoNumberFromPositionString, extractType } from "src/shared/parsingAction/fileRead"
 import { actionRecursive } from 'src/shared/report/recursiveData'
@@ -8,8 +9,16 @@ import { actionRecursive } from 'src/shared/report/recursiveData'
 @Injectable()
 export class ReportScatterService {
     constructor(
-        private reportUserGeneratingService: ReportUserGeneratingService
+        private reportUserGeneratingService: ReportUserGeneratingService,
+        private reportGlobalStatisticService: ReportGlobalStatisticService
     ) { }
+
+
+    async globalStatistic(body: any) {
+
+        let globalStatisticResult = await this.reportGlobalStatisticService.globalStatistic(body)
+        return  globalStatisticResult 
+    }
 
     async scatterStatstic(body: any) {
 
@@ -33,7 +42,7 @@ export class ReportScatterService {
         let heroPosition = [
             "UTG",
             "UTG+1",
-            "LJ", 
+            "LJ",
             "HJ",
             "CO", "BTN", "SB", "BB"
         ];
@@ -76,7 +85,7 @@ export async function mainDataGet(body: any) {
     let max8 = [
         "UTG",
         "UTG+1",
-        "LJ", 
+        "LJ",
         "HJ",
         "CO", "BTN", "SB", "BB"
     ];

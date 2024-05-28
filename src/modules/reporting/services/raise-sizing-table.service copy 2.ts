@@ -15,9 +15,6 @@ export class RaiseSizingTableService {
 
     let bufferAction = body.actionType.includes("all in") ? body.actionType.replace(/\s\(all in\)/g, '') : body.actionType
 
-    let bufferTableSeat = body.tableSize === '2~10' ? [2, 3, 4, 5, 6, 7, 8, 9, 10] : [body.tableSize]
-
-
     const stackDepthBucket = {
       'Shallow Stack': [10, 15, 20],
       'Middle Stack': [25, 30, 40, 50],
@@ -140,7 +137,7 @@ export class RaiseSizingTableService {
       let conditionPairPipeline = {
         userId: new mongoose.Types.ObjectId(body.userId),
         pokerRoomId: body.pokerType,
-        maxTableSeats: { $in: bufferTableSeat },
+        maxTableSeats: body.tableSize,
         date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) },
         "reportDetail.action": {
           $elemMatch: {
@@ -212,26 +209,21 @@ export class RaiseSizingTableService {
 
     } else if (body.type === "villain") {
 
-      console.log("stackDepthBucket[body.stackDepth]", stackDepthBucket[body.stackDepth]);
-      console.log("body.actionType", body.actionType);
-      console.log("bbRange[body.field]", bbRange[body.field]);
-
-      
       let conditionPairPipeline = {
         userId: new mongoose.Types.ObjectId(body.userId),
         pokerRoomId: body.pokerType,
-        maxTableSeats: { $in: bufferTableSeat },
+        maxTableSeats: body.tableSize,
         date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) },
         "reportDetail.action": {
           $elemMatch: {
             villain: {
               $elemMatch: {
                 villainCategory: { $in: [body.actionType] },
-                villainStackDepth: { $in: stackDepthBucket[body.stackDepth] },
               }
             },
           }
         },
+        "reportDetail.stackDepth": { $in: stackDepthBucket[body.stackDepth] },
       };
 
       const hasBettingActionCondition = {
@@ -242,25 +234,9 @@ export class RaiseSizingTableService {
                 {
                   $max: {
                     $map: {
-                      input: {
-                        $filter: {
-                          input: "$reportDetail.action",
-                          as: "action",
-                          cond: { $ne: ["$$action.villain", []] }
-                        }
-                      },
+                      input: "$reportDetail.action",
                       as: "action",
-                      in: {
-                        $max: {
-                          $map: {
-                            input: "$$action.villain",
-                            as: "villainAction",
-                            in: {
-                              $divide: ["$$villainAction.currentVillainActionAmount", body.field.includes("allin") ? "$bigBlind" : "$$villainAction.previousActionAmount"]
-                            }
-                          }
-                        }
-                      }
+                      in: { $divide: ["$$action.actionAmount", body.field.includes("allin") ? "$bigBlind" : "$$action.previousBettingAmount"] }
                     }
                   }
                 },
@@ -274,25 +250,9 @@ export class RaiseSizingTableService {
                 {
                   $max: {
                     $map: {
-                      input: {
-                        $filter: {
-                          input: "$reportDetail.action",
-                          as: "action",
-                          cond: { $ne: ["$$action.villain", []] }
-                        }
-                      },
+                      input: "$reportDetail.action",
                       as: "action",
-                      in: {
-                        $max: {
-                          $map: {
-                            input: "$$action.villain",
-                            as: "villainAction",
-                            in: {
-                              $divide: ["$$villainAction.currentVillainActionAmount", body.field.includes("allin") ? "$bigBlind" : "$$villainAction.previousActionAmount"]
-                            }
-                          }
-                        }
-                      }
+                      in: { $divide: ["$$action.actionAmount", body.field.includes("allin") ? "$bigBlind" : "$$action.previousBettingAmount"] }
                     }
                   }
                 },
@@ -301,14 +261,11 @@ export class RaiseSizingTableService {
             }
           }
         ]
-      };
-      
-      
-
+      }
 
       const handsPipeline = [
         { $match: conditionPairPipeline },
-        // { $match: hasBettingActionCondition },
+        { $match: hasBettingActionCondition },
         { $project: projectQuery },
         { $skip: skip },
         { $limit: limit }
@@ -331,7 +288,7 @@ export class RaiseSizingTableService {
       let conditionPairPipeline = {
         userId: new mongoose.Types.ObjectId(body.userId),
         pokerRoomId: body.pokerType,
-        maxTableSeats: { $in: bufferTableSeat },
+        maxTableSeats: body.tableSize,
         date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) },
         "reportDetail.action": {
           $elemMatch: {

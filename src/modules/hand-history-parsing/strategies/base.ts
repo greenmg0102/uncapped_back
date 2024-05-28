@@ -36,6 +36,7 @@ export class BaseParser {
   ];
 
   findPlayer(nickname: string): string {
+    
     return this.handData.players.find(
       (player) => player.playerName === nickname,
     )?.playerName;

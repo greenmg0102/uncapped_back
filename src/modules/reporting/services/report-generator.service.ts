@@ -30,9 +30,6 @@ export class ReportGeneratorService {
 
     async reportIntegration(body: any) {
 
-        console.log("reportIntegration", body);
-
-
         let currentAction = body.action
         let userDataSection = []
 

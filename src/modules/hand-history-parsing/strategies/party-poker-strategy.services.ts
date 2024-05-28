@@ -1,5 +1,7 @@
 import { ParsedReturnData } from '../interfaces/parser.interface';
 import { BaseParser } from './base';
+import * as moment from 'moment';
+
 const {
   parseStringInt,
   parseStringFloat,
@@ -13,6 +15,7 @@ class PartyPokerStrategyService extends BaseParser {
   }
 
   parse(sections: string[]): ParsedReturnData {
+
     let data: ParsedReturnData = {
       data: [],
       parsedNumber: 0,
@@ -27,12 +30,12 @@ class PartyPokerStrategyService extends BaseParser {
 
     for (const section of sections) {
       this.initHandData();
-      const lines = section.split('\n');
-      let lineData = this.sectionParser(lines);
+      let lineData = this.sectionParser(section);
       if (lineData) {
         data.data.push(lineData);
         data.parsedNumber++;
       } else {
+        const lines = section.split('\n');
         if (!lines[0].match(/.+/)) break;
         data.rejectedNumber++;
       }
@@ -70,10 +73,15 @@ class PartyPokerStrategyService extends BaseParser {
     // date regex
     const dateTime = dateTimeRegex.exec(line);
     if (dateTime) {
-      this.handData.handDate =
-        dateTime[2] + ' ' + dateTime[3] + ' ' + dateTime[6];
+
+      let originDate = dateTime[2] + ' ' + dateTime[3] + ' ' + dateTime[6];
+      const dateObject = moment(originDate, 'MMM DD YYYY');
+      const newDateString = dateObject.format('YYYY/MM/DD');
+
+      this.handData.handDate = newDateString + ' ' + dateTime[4]
       this.handData.handTime = dateTime[4];
       this.handData.handTimezone = dateTime[5];
+
     }
 
     const regionalMatch = line.match(regionalRegex);
@@ -109,7 +117,7 @@ class PartyPokerStrategyService extends BaseParser {
     const gameMatch = line.match(gamePattern);
     if (gameMatch) {
       this.handData.pokerForm = 'Holdem';
-      this.handData.pokerType = 'NL';
+      this.handData.pokerType = 'No Limit'; // NL
     }
   }
 
@@ -311,15 +319,52 @@ class PartyPokerStrategyService extends BaseParser {
     }
   }
 
-  sectionParser(chunks: string[]) {
+  checkSbCaseChip(line: string): number {
+    if (line.includes('small blind')) {
+      const numberPattern = /\((\d+)\)/;
+      return Number(line.match(numberPattern)[1]);
+    } else return 0
+  }
+
+  checkHeroChip(line: string): number {
+    const numberPattern = /\((\d+)\)/;
+    return Number(line.match(numberPattern)[1]);
+  }
+
+  checkReturnedChip(line: string): number {
+    const numberPattern = /[-+]?\d+/g;
+    const numbers = line.match(numberPattern);
+
+    if (numbers && numbers.length >= 4) {
+      const fourthNumber = Number(numbers[3]);
+
+      console.log("fourthNumber", fourthNumber);
+      
+      return fourthNumber
+    } else {
+      console.log("No fourth number found.");
+      return 0
+    }
+  }
+
+  sectionParser(data: string) {
+
+    let heroChipBeforeHole = 0
+    let returnedChip = 0
+    let sbCaseChip = 0
+
+
     this.currentStreet = this.street.preFlop;
+
+    const lines = data.split('\n');
+
     const playerRegex = /Seat (\d+): (.+) \(\$?([\d,|\d.]+)\)/;
     const boardRegex = /Board: \[(.+)\]/;
 
     const emptyRegex =
       /^\*\*\*\*\* Hand History For Game [A-Za-z0-9]+ \*\*\*\*\*/;
-    const emptyLine = emptyRegex.exec(chunks[0]);
-    const headLine = chunks[1] ? chunks[1].toLowerCase() : '';
+    const emptyLine = emptyRegex.exec(lines[0]);
+    const headLine = lines[1] ? lines[1].toLowerCase() : '';
 
     if (
       !emptyLine ||
@@ -331,7 +376,18 @@ class PartyPokerStrategyService extends BaseParser {
     }
 
     let __beforeLine = '';
-    for (let line of chunks) {
+    for (let line of lines) {
+
+      if (line.includes('posts') && line.includes('Hero')) {
+        heroChipBeforeHole += this.checkHeroChip(line)
+        sbCaseChip = this.checkSbCaseChip(line)
+      }
+
+      if (line.includes('collected') && line.includes('Hero')) {
+        returnedChip += this.checkReturnedChip(line)
+      }
+
+
       if (line.includes('History For Game')) {
         this.parseHandId(line);
       }
@@ -342,6 +398,7 @@ class PartyPokerStrategyService extends BaseParser {
       if (line.includes('Table')) {
         this.parseTable(line);
       }
+
       this.parseTableSeat(line);
 
       //  Extract players
@@ -396,6 +453,11 @@ class PartyPokerStrategyService extends BaseParser {
       }
       __beforeLine = line;
     }
+
+    this.handData.rawData = data
+    this.handData.heroChipBeforeHole = heroChipBeforeHole
+    this.handData.returnedChip = returnedChip
+    this.handData.sbCaseChip = sbCaseChip
 
     return this.handData;
   }

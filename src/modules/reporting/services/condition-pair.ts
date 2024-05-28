@@ -9,8 +9,11 @@ export class ConditionPairService {
 
   async conditionPair(body: any) {
 
+    console.log("conditionPair", body);
+
     const heroPosition = body.reportSetting.position;
     const heroAction = body.reportSetting.action;
+    const stackDepthCategory = body.stackDepthCategory
     const skip = (body.page - 1) * body.pageSize;
     const limit = body.pageSize;
 
@@ -18,6 +21,7 @@ export class ConditionPairService {
       pokerRoomId: body.pokerType,
       date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) },
       "reportContent.heroPosition": heroPosition,
+      "reportDetail.stackDepth": { $in: stackDepthCategory.split(',').map(Number) }
     };
 
     const projectQuery = {

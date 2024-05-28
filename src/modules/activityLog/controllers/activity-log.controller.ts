@@ -5,7 +5,6 @@ import {
     Body,
     Req
 } from '@nestjs/common';
-
 import { ActivityReadService } from 'src/modules/activityLog/services/activity-read.service'
 
 @Controller('activity-log')
@@ -24,7 +23,6 @@ export class ActivityLogController {
 
     @Get('/get-statistic-info')
     async getStatisticInfo() {
-
         const hands = await this.activityReadService.getStatisticInfo();
         return hands;
     }
