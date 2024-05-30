@@ -12,8 +12,11 @@ export class ReportDetailTableService {
 
   async detailedTable(body: any) {
 
+    console.log("detailedTable", body);
+
     let actionArray = ["RFI", "vs RFI", "3-Bet", "vs 3-Bet", "4-Bet", "vs 4-Bet", "5-Bet"]
     let bufferTableSeat = body.tableSize === '2~10' ? [2, 3, 4, 5, 6, 7, 8, 9, 10] : [body.tableSize]
+    let bufferPokerType = body.pokerType === "N/A" ? { $exists: true } : body.pokerType
 
     // let matchObj = {
     //   userId: new mongoose.Types.ObjectId(body.userId),
@@ -34,7 +37,7 @@ export class ReportDetailTableService {
       let matchObj = {
         userId: new mongoose.Types.ObjectId(body.userId),
         "reportDetail.action": action === "" ? { $exists: true } : { $elemMatch: { category: { $in: [body.action] } } },
-        pokerRoomId: body.pokerType,
+        pokerRoomId: bufferPokerType,
         maxTableSeats: { $in: bufferTableSeat },
         date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) }
       };
@@ -239,7 +242,6 @@ export class ReportDetailTableService {
       return statistics;
     } else {
 
-      console.log("body", body);
 
       let heroPosiotionList = exchangeIntoNumberFromPositionString(body.heroPosition)
       let villianPosiotionList = exchangeIntoNumberFromPositionString(body.VillianPosition)
@@ -250,7 +252,7 @@ export class ReportDetailTableService {
       let matchObj = {
         userId: new mongoose.Types.ObjectId(body.userId),
         // "reportDetail.action": action === "" ? { $exists: true } : { $elemMatch: { category: { $in: [body.action] } } },
-        pokerRoomId: body.pokerType,
+        pokerRoomId: bufferPokerType,
         maxTableSeats: { $in: bufferTableSeat },
         date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) }
       };
@@ -452,8 +454,6 @@ export class ReportDetailTableService {
           }
         }
       ])
-
-      console.log("statistics", statistics);
 
       return statistics;
 
