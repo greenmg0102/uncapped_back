@@ -30,8 +30,6 @@ class WpnPokerStrategyService extends BaseParser {
       this.initHandData();
       const lines = section.split('\n');
 
-      console.log(lines[0]);
-
       let heroString = lines.filter((item: any) => item.includes("Dealt to")).length > 0 && lines.filter((item: any) => item.includes("Dealt to"))[0].split(" ")[2]
 
       let lineData = this.wpnSectionParser(section, heroString);
@@ -352,9 +350,6 @@ class WpnPokerStrategyService extends BaseParser {
       }
 
       if (line.includes('won') && line.includes(heroString)) {
-
-        console.log("heroString", line);
-
         returnedChip += this.checkReturnedChip(line)
       }
 

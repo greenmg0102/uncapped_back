@@ -19,6 +19,13 @@ export class ReportGlobalStatisticService {
             date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) }
         }
 
+        const totalCount = await this.handHistoryModel.countDocuments(pipeLine);
+
+        // let between: any = totalCount > 200 ? this.generateNumbers(totalCount, 100) : totalCount
+        let between: any = totalCount
+
+        console.log("between", between);
+
         let groupObj = {
             _id: "$_id",
             handDate: { $first: "$handDate" },
@@ -325,6 +332,9 @@ export class ReportGlobalStatisticService {
             sumNotShowHand: 0
         });
 
+        console.log('statistical', statistics.length);
+
+
         for (let i = 0; i < statistics.length; i++) {
 
             for (let j = 0; j < i; j++) {
@@ -357,4 +367,21 @@ export class ReportGlobalStatisticService {
         return real;
 
     }
+
+    generateNumbers(randomValue: any, rangeBetween: any) {
+        let value = 1;
+        let range = 100;
+
+        while (randomValue > range) {
+
+            console.log("i", range);
+
+            value *= 10;
+            range *= 10;
+        }
+
+        return value;
+    }
+
+
 }

@@ -17,14 +17,17 @@ export class EachHandGetService {
 
     const { pageNumber, pageSize, pokerType, tableSize, heroPosition, range, userId } = pageData;
 
+    console.log("pageData", pageData);
+    
+
     let seatNumber = this.getPlayerSeatNumber(heroPosition)
 
     const skip = (pageNumber - 1) * pageSize;
     const limit = pageSize;
     const query = {
       userId: new mongoose.Types.ObjectId(userId),
-      pokerRoomId: pokerType === "N/A" ? { $regex: new RegExp("", "i") } : pokerType,
-      maxTableSeats: tableSize === "N/A" ? { $exists: true } : parseInt(tableSize),
+      pokerRoomId: pokerType === "N/A" ? { $exists: true } : pokerType,
+      maxTableSeats: tableSize === "2~10" ? { $exists: true } : tableSize,
       "reportContent.heroPosition": seatNumber === null ? { $exists: true } : seatNumber,
       date: { $gte: new Date(range.split(" to ")[0]), $lte: new Date(range.split(" to ")[1]) }
     };
@@ -51,12 +54,10 @@ export class EachHandGetService {
     const skip = (pageNumber - 1) * pageSize;
     const limit = pageSize;
 
-    console.log("pageData", pageData);
-
     const query = {
       userId: new mongoose.Types.ObjectId(userId),
       pokerRoomId: pokerType === "N/A" ? { $exists: true } : pokerType,
-      maxTableSeats: tableSize === "N/A" ? { $exists: true } : parseInt(tableSize),
+      maxTableSeats: tableSize === "2~10" ? { $exists: true } : tableSize,
       "reportDetail.heroPosition": seatNumber === null ? { $exists: true } : seatNumber,
       // players: {
       //   $elemMatch: {

@@ -11,8 +11,6 @@ export class SupportService {
 
   async post(body: any) {
 
-    console.log('body', body);
-
     let real: any = {}
 
     real.fullName = body.fullName

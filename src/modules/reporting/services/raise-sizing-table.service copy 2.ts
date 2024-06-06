@@ -283,8 +283,6 @@ export class RaiseSizingTableService {
 
     } else if (body.type === "Suqeeze") {
 
-      console.log("body", body);
-
       let conditionPairPipeline = {
         userId: new mongoose.Types.ObjectId(body.userId),
         pokerRoomId: body.pokerType,

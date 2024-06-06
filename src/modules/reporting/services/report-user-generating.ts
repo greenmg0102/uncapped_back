@@ -50,8 +50,6 @@ export class ReportUserGeneratingService {
 
   async userDataGenerating(body: any) {
 
-    console.log("userDataGenerating", body);
-
     let heroPosiotionList = exchangeIntoNumberFromPositionString(body.heroPosition)
     let villianPosiotionList = exchangeIntoNumberFromPositionString(body.VillianPosition)
     let stackDepth = body.stackDepth

@@ -10,15 +10,11 @@ export class RaiseSizingTableService {
 
   async raisingSizeTabelExtracting(body: any) {
 
-    console.log("raisingSizeTabelExtracting", body);
-
-
     const skip = (body.page - 1) * body.pageSize;
     const limit = body.pageSize;
 
     let bufferAction = body.actionType.includes("all in") ? body.actionType.replace(/\s\(all in\)/g, '') : body.actionType
     let bufferTableSeat = body.tableSize === '2~10' ? [2, 3, 4, 5, 6, 7, 8, 9, 10] : [body.tableSize]
-    let bufferPokerType = body.pokerType === "N/A" ? { $exists: true } : body.pokerType
 
 
     const stackDepthBucket = {
@@ -142,7 +138,7 @@ export class RaiseSizingTableService {
 
       let conditionPairPipeline = {
         userId: new mongoose.Types.ObjectId(body.userId),
-        pokerRoomId: bufferPokerType,
+        pokerRoomId: body.pokerType === 'N/A' ? { '$exists': true } : body.pokerType,
         maxTableSeats: { $in: bufferTableSeat },
         date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) },
         "reportDetail.action": {
@@ -217,7 +213,7 @@ export class RaiseSizingTableService {
 
       let conditionPairPipeline = {
         userId: new mongoose.Types.ObjectId(body.userId),
-        pokerRoomId: bufferPokerType,
+        pokerRoomId: body.pokerType === 'N/A' ? { '$exists': true } : body.pokerType,
         maxTableSeats: { $in: bufferTableSeat },
         date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) },
         "reportDetail.action": {
@@ -323,7 +319,7 @@ export class RaiseSizingTableService {
 
       let conditionPairPipeline = {
         userId: new mongoose.Types.ObjectId(body.userId),
-        pokerRoomId: bufferPokerType,
+        pokerRoomId: body.pokerType === 'N/A' ? { '$exists': true } : body.pokerType,
         maxTableSeats: { $in: bufferTableSeat },
         date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) },
         "reportDetail.action": {

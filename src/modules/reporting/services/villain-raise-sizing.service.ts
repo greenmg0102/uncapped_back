@@ -19,7 +19,6 @@ export class VillainRaiseSizingService {
     }
 
     let bufferTableSeat = body.tableSize === '2~10' ? [2, 3, 4, 5, 6, 7, 8, 9, 10] : [body.tableSize]
-    let bufferPokerType = body.pokerType === "N/A" ? { $exists: true } : body.pokerType
 
     let matchObj = {
       userId: new mongoose.Types.ObjectId(body.userId),
@@ -33,7 +32,7 @@ export class VillainRaiseSizingService {
           },
         }
       },
-      pokerRoomId: bufferPokerType,
+      pokerRoomId: body.pokerType,
       maxTableSeats: { $in: bufferTableSeat },
       date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) }
     };

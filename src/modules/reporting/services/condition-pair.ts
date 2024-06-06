@@ -9,20 +9,16 @@ export class ConditionPairService {
 
   async conditionPair(body: any) {
 
-    console.log("conditionPair", body);
+    let bufferTableSeat = body.tableSize === '2~10' ? [2, 3, 4, 5, 6, 7, 8, 9, 10] : [body.tableSize]
 
     const heroPosition = body.reportSetting.position;
     const heroAction = body.reportSetting.action;
     const stackDepthCategory = body.stackDepthCategory
-
-    let bufferTableSeat = body.tableSize === '2~10' ? [2, 3, 4, 5, 6, 7, 8, 9, 10] : [body.tableSize]
-    let bufferPokerType = body.pokerType === "N/A" ? { $exists: true } : body.pokerType
-
     const skip = (body.page - 1) * body.pageSize;
     const limit = body.pageSize;
 
     let conditionPairPipeline = {
-      pokerRoomId: bufferPokerType,
+      pokerRoomId: body.pokerType === 'N/A' ? { '$exists': true } : body.pokerType,
       maxTableSeats: { $in: bufferTableSeat },
       date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) },
       "reportContent.heroPosition": heroPosition,

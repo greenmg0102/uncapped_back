@@ -3,9 +3,12 @@ import { actionRecursive } from 'src/shared/report/recursiveData'
 
 export function GeneralReportLogic(body: any) {
 
+  console.log("GeneralReportLogic", body);
+
   let actonTraking = actionRecursive[body.action]
 
   let result: any = []
+
   let max8 = ["UTG", "UTG+1", "LJ", "HJ", "CO", "BTN", "SB", "BB"]
   let bbData = [10, 15, 20, 25, 30, 398750, 50, 60, 80, 100]
   let heroPositionList = body.heroPositionList.length === 0 ? max8.slice(max8.length - Object.keys(actonTraking).length, max8.length) : body.heroPositionList
@@ -15,21 +18,7 @@ export function GeneralReportLogic(body: any) {
   let stackDepthList = body.stackDepthList.length === 0 ? bbData : body.stackDepthList
   let tableSize = body.tableSize
 
-  // console.log('heroPositionList', heroPositionList);
-  // console.log('heroPositionNumberList', heroPositionNumberList);
-  // console.log('stackDepthList', stackDepthList);
-  // console.log('tableSize', tableSize);
-  // console.log('villianPosition', body.villianPosition);
-  // console.log('villianPositionNumberList', villianPositionNumberList);
-
   let buffer = actonTraking[heroPositionList[0]];
-
-  // let buffer = squeezeActionRecursive.find((item: any) => item.squeeze === "1 Caller" && item.action === "First Action" && item.position === "UTG").rangeList
-
-  // console.log('actonTraking', actonTraking);
-  // console.log('heroPositionList', heroPositionList);
-  // console.log('buffer', buffer);
-  // console.log("buffer1", buffer);
 
   const processBuffer = async () => {
     try {
@@ -47,10 +36,14 @@ export function GeneralReportLogic(body: any) {
 
   processBuffer();
 
+  console.log("buffer", buffer);
+  
+
   stackDepthList.forEach((stack: any) => heroPositionList.forEach((position: any, order: any) => {
 
     Object.keys(buffer).forEach((actionRF: any) => {
-      let buffer = SqueezeReportLogicRecursive(stack === 40 ? 398750 : stack, tableSize, heroPositionNumberList[order], 0, actonTraking[position][actionRF], 0)
+      let buffer = GeneralReportLogicRecursive(stack === 40 ? 398750 : stack, 8, heroPositionNumberList[order], 8 - tableSize, actonTraking[position][actionRF], 0)
+      // let buffer = GeneralReportLogicRecursive(stack === 40 ? 398750 : stack, tableSize, heroPositionNumberList[order], 0, actonTraking[position][actionRF], 0)
       result.push(buffer)
     });
 
@@ -59,7 +52,7 @@ export function GeneralReportLogic(body: any) {
   return sumAverage(result)
 }
 
-export function SqueezeReportLogicRecursive(stackDepth: number, maxPlayer: number, heroPosition: number, currentPosition: number, actionRFList: any, index: any) {
+export function GeneralReportLogicRecursive(stackDepth: number, maxPlayer: number, heroPosition: number, currentPosition: number, actionRFList: any, index: any) {
 
   if (currentPosition !== undefined) {
     if (actionRFList.length === 1) {
@@ -71,8 +64,8 @@ export function SqueezeReportLogicRecursive(stackDepth: number, maxPlayer: numbe
 
       secondPosition = extractType(real.actions, actionRFList[index])
 
-      // if (real.player !== heroPosition) return SqueezeReportLogicRecursive(stackDepth, maxPlayer, heroPosition, secondPosition, actionRFList, index + 1)
-      if (index !== actionRFList.length - 1) return SqueezeReportLogicRecursive(stackDepth, maxPlayer, heroPosition, secondPosition, actionRFList, index + 1)
+      // if (real.player !== heroPosition) return GeneralReportLogicRecursive(stackDepth, maxPlayer, heroPosition, secondPosition, actionRFList, index + 1)
+      if (index !== actionRFList.length - 1) return GeneralReportLogicRecursive(stackDepth, maxPlayer, heroPosition, secondPosition, actionRFList, index + 1)
       else return real
     }
   }

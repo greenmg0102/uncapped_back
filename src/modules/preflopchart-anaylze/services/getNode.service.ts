@@ -10,6 +10,9 @@ export class GetNodeService {
 
   async getNode(body: GetPreflopInterface, res: any): Promise<any> {
 
+    console.log("getNode", body);
+
+
     const fileData = generateFileData(body.chipAmount, body.maxUser, body.nodeNumber);
     res.setHeader('Content-Type', 'application/octet-stream');
     res.setHeader('Content-Disposition', 'attachment; filename=filename.text');
