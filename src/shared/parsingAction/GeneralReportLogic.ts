@@ -14,7 +14,7 @@ export function GeneralReportLogic(body: any) {
   let heroPositionList = body.heroPositionList.length === 0 ? max8.slice(max8.length - Object.keys(actonTraking).length, max8.length) : body.heroPositionList
 
   let heroPositionNumberList = exchangeIntoNumberFromPositionString(body.heroPositionList.length === 0 ? max8.slice(1, max8.length) : body.heroPositionList)
-  let villianPositionNumberList = exchangeIntoNumberFromPositionString(body.villianPosition.length === 0 ? [] : body.villianPosition)
+  let villianPositionNumberList = exchangeIntoNumberFromPositionString(body.VillianPosition.length === 0 ? [] : body.VillianPosition)
   let stackDepthList = body.stackDepthList.length === 0 ? bbData : body.stackDepthList
   let tableSize = body.tableSize
 

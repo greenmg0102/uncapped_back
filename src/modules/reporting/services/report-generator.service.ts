@@ -34,8 +34,8 @@ export class ReportGeneratorService {
         let userDataSection = []
 
         if (!body.isSqueeze) userDataSection = await this.reportUserGeneratingService.userDataGenerating(body);
-        else userDataSection = await this.reportUserGeneratingService.squeezeUserDataGenerating(body);
-
+        else userDataSection = await this.reportUserGeneratingService.squeezeUserDataGenerating(body); 
+        
         let userData = !body.isSqueeze ? userDataFrequencySort(userDataSection, currentAction) : squeezeUserDataFrequencySort(body, userDataSection)
 
         return {
@@ -57,13 +57,15 @@ export class ReportGeneratorService {
 
     async mainDataHandInfo(body: any) {
 
-        let buffer = body
-        buffer.heroPosition = [body.heroPosition]
-        buffer.stackDepth = [body.stackDepth]
+        console.log("mainDataHandInfo", body);
 
-        buffer.villianPosition = body.VillianPosition
+        // let buffer = body
+        // buffer.heroPosition = [body.heroPosition]
+        // buffer.stackDepth = [body.stackDepth]
 
-        return await this.reportCollectionService.collections(buffer)
+        // buffer.villianPosition = body.VillianPosition
+
+        return await this.reportCollectionService.collections(body)
     }
 
 }

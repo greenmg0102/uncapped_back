@@ -27,8 +27,8 @@ export class ConfigService {
         // uri: "mongodb+srv://pokerstrategy:Supernova%40525@cluster0.1syllpl.mongodb.net/?retryWrites=true&w=majority",
 
         return {
-            uri: 'mongodb://' + this.get('DATABASE_HOST') + ':' + this.get('DATABASE_PORT') + '/' + this.get('DATABASE_NAME'),
-            // uri: "mongodb+srv://pokerstrategy:Supernova%40525@cluster0.1syllpl.mongodb.net/?retryWrites=true&w=majority",
+            // uri: 'mongodb://' + this.get('DATABASE_HOST') + ':' + this.get('DATABASE_PORT') + '/' + this.get('DATABASE_NAME'),
+            uri: "mongodb+srv://pokerstrategy:Supernova%40525@cluster0.1syllpl.mongodb.net/?retryWrites=true&w=majority",
             useNewUrlParser: true,
             useUnifiedTopology: true,
         };
