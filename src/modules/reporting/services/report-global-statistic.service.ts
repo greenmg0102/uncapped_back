@@ -19,13 +19,6 @@ export class ReportGlobalStatisticService {
             date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) }
         }
 
-        const totalCount = await this.handHistoryModel.countDocuments(pipeLine);
-
-        // let between: any = totalCount > 200 ? this.generateNumbers(totalCount, 100) : totalCount
-        let between: any = totalCount
-
-        console.log("between", between);
-
         let groupObj = {
             _id: "$_id",
             handDate: { $first: "$handDate" },
@@ -169,17 +162,24 @@ export class ReportGlobalStatisticService {
                 $sum: {
                     $cond: {
                         if: {
-                            $gt: [
+                            $and: [
                                 {
-                                    $size: {
-                                        $filter: {
-                                            input: "$summary.shows",
-                                            as: "show",
-                                            cond: { $eq: ["$$show.playerName", "Hero"] },
+                                    $gt: [
+                                        {
+                                            $size: {
+                                                $filter: {
+                                                    input: "$summary.shows",
+                                                    as: "show",
+                                                    cond: { $eq: ["$$show.playerName", "Hero"] },
+                                                },
+                                            },
                                         },
-                                    },
+                                        0,
+                                    ]
                                 },
-                                0,
+                                {
+                                    $gt: [{ $size: { $filter: { input: "$summary.collected", as: "item", cond: { $eq: ["$$item.playerName", "Hero"] } } } }, 0]
+                                }
                             ]
                         },
                         then: {
@@ -237,17 +237,24 @@ export class ReportGlobalStatisticService {
                 $sum: {
                     $cond: {
                         if: {
-                            $lt: [
+                            $and: [
                                 {
-                                    $size: {
-                                        $filter: {
-                                            input: "$summary.shows",
-                                            as: "show",
-                                            cond: { $eq: ["$$show.playerName", "Hero"] },
+                                    $lt: [
+                                        {
+                                            $size: {
+                                                $filter: {
+                                                    input: "$summary.shows",
+                                                    as: "show",
+                                                    cond: { $eq: ["$$show.playerName", "Hero"] },
+                                                },
+                                            },
                                         },
-                                    },
+                                        1,
+                                    ]
                                 },
-                                1,
+                                {
+                                    $gt: [{ $size: { $filter: { input: "$summary.collected", as: "item", cond: { $eq: ["$$item.playerName", "Hero"] } } } }, 0]
+                                }
                             ]
                         },
                         then: {
@@ -279,7 +286,6 @@ export class ReportGlobalStatisticService {
                             ]
                         },
                         else: {
-
                             $multiply: [
                                 {
                                     $divide: [
@@ -296,7 +302,9 @@ export class ReportGlobalStatisticService {
                                         },
                                         { $toDouble: "$bigBlind" }
                                     ]
-                                }, -1]
+                                },
+                                -1
+                            ]
                         }
                     }
                 }
@@ -326,16 +334,13 @@ export class ReportGlobalStatisticService {
         let count = 0;
 
         real.push({
-            sumBB: 0,
-            sumExpected: 0,
-            sumShow: 0,
-            sumNotShowHand: 0
+            sumBB: statistics[0].bb100,
+            sumExpected: statistics[0].allinbb100,
+            sumShow: statistics[0].showHand,
+            sumNotShowHand: statistics[0].notShowHand,
         });
 
-        console.log('statistical', statistics.length);
-
-
-        for (let i = 0; i < statistics.length; i++) {
+        for (let i = 1; i < statistics.length; i++) {
 
             for (let j = 0; j < i; j++) {
 
@@ -373,8 +378,6 @@ export class ReportGlobalStatisticService {
         let range = 100;
 
         while (randomValue > range) {
-
-            console.log("i", range);
 
             value *= 10;
             range *= 10;

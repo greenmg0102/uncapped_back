@@ -52,6 +52,7 @@ export class DataStreamController {
 
       for (const file of files) {
         const stream = new Readable();
+
         stream.push(file.buffer);
         stream.push(null);
 
@@ -69,7 +70,7 @@ export class DataStreamController {
 
         if (strategyService) {
           data = await strategyService.parse(sections);
-          
+
           this.handModelService
             .saveHistory(data.data, roomType, userId)
             .then((res: any) => {
@@ -157,7 +158,7 @@ export class DataStreamController {
         const strategyService = this.roomStrategyFactory.createStrategy(roomType);
 
         if (strategyService) {
-          
+
           let data: ParsedReturnData = await strategyService.parse(sections);
 
           const user: any = request.user;

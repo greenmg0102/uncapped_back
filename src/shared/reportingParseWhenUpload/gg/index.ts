@@ -7,13 +7,9 @@ export async function reportingParseGG(players: any, actions: any, bigBlind: any
 
     let tableStandard = tableSeat[players.length]
     
-    console.log("players", players);
-
     let bufferHeroSeat = players.filter((obj: any) => obj.playerName === 'Hero')[0].seatNumber;
 
     let bufferHeroPosition = players.findIndex((obj: any) => obj.playerName === 'Hero');
-
-    console.log("bufferHeroPosition", bufferHeroPosition);
 
     let bufferBTNPosition = players.findIndex((obj: any) => obj.seatNumber === buttonSeat);
 

@@ -71,8 +71,9 @@ export class EachHandGetService {
     const totalCount = await this.handHistoryModel.countDocuments(query);
     const hands = await this.handHistoryModel.aggregate([
       { $match: query },
+      { $sort: { handDate: -1 } },
       { $skip: skip },
-      { $limit: limit }
+      { $limit: limit },
     ]).exec();
 
     return {

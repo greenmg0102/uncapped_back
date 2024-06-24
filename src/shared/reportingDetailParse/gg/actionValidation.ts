@@ -5,7 +5,6 @@ const standards = [10, 15, 20, 25, 30, 40, 50, 60, 80, 100];
 
 export default function actionValidation(playerList: any, actionsList: any, heroPostion: any, stackRange: any, tableStandard: any, bufferBTNPosition: any, bigBlind: any): any {
 
-
     let reportDetail = {
         heroPosition: null,
         stackDepth: null,
@@ -44,7 +43,11 @@ export default function actionValidation(playerList: any, actionsList: any, hero
         }
 
         let actionItem: any = {}
+
         actionItem.category = actionTypeValidation(real.slice(0, indexItem + 1), indexItem)
+
+        console.log("Hero's action list", actionTypeValidation(real.slice(0, indexItem + 1), indexItem));
+
         actionItem.actionAmount = real[indexItem].actionAmount
         actionItem.currentAction = real[indexItem].action
 
@@ -76,8 +79,6 @@ export default function actionValidation(playerList: any, actionsList: any, hero
 
 export function villianValidation(playerList: any, actionsList: any, bigBlind: any): any {
 
-    // console.log("actionsList", actionsList);
-
     let villianNameList = actionsList
         .filter((item: any) =>
             item.playerName !== "Hero" &&
@@ -87,12 +88,9 @@ export function villianValidation(playerList: any, actionsList: any, bigBlind: a
                 item.action === "call" || item.action === "check" ||
                 item.action === "bet" || item.action === "check"
             )
-        );
-    // console.log("villianNameList", villianNameList);
+        )
 
     let villainPlayerNames = villianNameList.map((villain: any) => villain.playerName);
-
-    // console.log("villainPlayerNames", villainPlayerNames);
 
     let indexes = playerList.reduce((acc: any, obj: any, index: any) => {
         if (villainPlayerNames.includes(obj.playerName)) {
@@ -131,13 +129,9 @@ export function villianValidation(playerList: any, actionsList: any, bigBlind: a
     return indexes
 }
 
-
 export function actionTypeValidation(preflopActioList: any, heroIndex: any): any {
 
-    // console.log("actionTypeValidation \n", "preflopActioList \n", preflopActioList, "heroIndex \n", heroIndex);
-
     let actionList = []
-    // let sameBet = ["VPIP", "RFI", "vs RFI", "PFR", "3-Bet", "vs 3-Bet", "Bb/100", "4-Bet", "VS 4-Bet", "bb/100", "5-Bet +", "vs 5-Bet +"]
     let actionBet = ["RFI", "vs RFI", "3-Bet", "vs 3-Bet", "4-Bet", "VS 4-Bet", "5-Bet +"]
     let totalCount = []
 
@@ -147,35 +141,33 @@ export function actionTypeValidation(preflopActioList: any, heroIndex: any): any
 
     let matchedPosition = totalCount.indexOf(heroIndex)
 
-    if (matchedPosition === 0) actionList = ["RFI"]
-    else if (matchedPosition === 1) {
+    if (heroIndex && preflopActioList && preflopActioList[heroIndex] && preflopActioList[heroIndex] !== "fold") actionList.push("VPIP")
+    else actionList.push("fold")
 
+    if (matchedPosition === 0) actionList.push("RFI")
+    if (matchedPosition > -1) actionList.push("PFR")
+
+    // if (
+    //     heroIndex && preflopActioList && preflopActioList[heroIndex] && preflopActioList[heroIndex] === "raise" &&
+    //     heroIndex && preflopActioList && preflopActioList[heroIndex] && preflopActioList[heroIndex] === "all in, raise"     
+    // ) actionList.push("PFR")
+
+    else if (matchedPosition === 1) {
         let callerIndexList = preflopActioList.reduce((acc: any, curr: any, index: any) => {
-            if (curr.action === "call") {
-                acc.push(index);
-            }
+            if (curr.action === "call") acc.push(index);
             return acc;
         }, []);
 
-        if (
-            callerIndexList.length === 1 &&
-            totalCount.length === 2 &&
-            callerIndexList[0] > totalCount[0] &&
-            callerIndexList[0] < totalCount[1]
-        ) {
-            actionList.push("squeeze")
-        } else {
-            actionList.push("3-Bet")
-        }
-
+        if (callerIndexList.length === 1 && totalCount.length === 2 && callerIndexList[0] > totalCount[0] && callerIndexList[0] < totalCount[1]) actionList.push("squeeze")
+        else actionList.push("3-Bet")
     }
     else if (matchedPosition === 2) actionList.push("4-Bet")
     else if (matchedPosition >= 3) actionList.push("5-Bet +")
-    else if (matchedPosition === -1 && totalCount.length === 0) actionList.push("VPIP")
+
+    // else if (matchedPosition === -1 && totalCount.length === 0) actionList.push("VPIP")
     else if (matchedPosition === -1 && totalCount[totalCount.length - 1] < heroIndex) {
         let realIndex = (2 * (totalCount.length - 1)) + 1
         actionList.push(actionBet[realIndex])
     }
-
-    return actionList
+    return actionList.length === 0 ? ["fold"] : actionList
 }

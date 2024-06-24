@@ -49,12 +49,13 @@ export class ReportUserGeneratingService {
   }
 
   async userDataGenerating(body: any) {
-
     
     let heroPosiotionList = exchangeIntoNumberFromPositionString(body.heroPositionList)
     let villianPosiotionList = exchangeIntoNumberFromPositionString(body.VillianPosition)
     let stackDepth = body.stackDepthList
     let action = body.action
+
+    console.log('action', action);
     
     let pipeLine = {
       userId: new mongoose.Types.ObjectId(body.userId),

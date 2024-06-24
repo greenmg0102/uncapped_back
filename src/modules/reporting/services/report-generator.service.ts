@@ -57,8 +57,6 @@ export class ReportGeneratorService {
 
     async mainDataHandInfo(body: any) {
 
-        console.log("mainDataHandInfo", body);
-
         // let buffer = body
         // buffer.heroPosition = [body.heroPosition]
         // buffer.stackDepth = [body.stackDepth]
