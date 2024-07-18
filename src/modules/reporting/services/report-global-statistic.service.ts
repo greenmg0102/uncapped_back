@@ -34,9 +34,7 @@ export class ReportGlobalStatisticService {
                                     $subtract: [
                                         {
                                             $add: [
-                                                {
-                                                    $toDouble: { $arrayElemAt: [{ $map: { input: { $filter: { input: "$summary.collected", as: "item", cond: { $eq: ["$$item.playerName", "Hero"] } } }, as: "item", in: "$$item.amount" } }, 0] }
-                                                },
+                                                { $toDouble: { $arrayElemAt: [{ $map: { input: { $filter: { input: "$summary.collected", as: "item", cond: { $eq: ["$$item.playerName", "Hero"] } } }, as: "item", in: "$$item.amount" } }, 0] } },
                                                 { $toDouble: "$returnedChip" }
                                             ]
                                         },
@@ -73,11 +71,92 @@ export class ReportGlobalStatisticService {
                                         },
                                         { $toDouble: "$bigBlind" }
                                     ]
-                                }, -1]
+                                }, -1
+                            ]
                         }
                     }
                 }
             },
+            // allinbb100: {
+            //     $sum: {
+            //         $cond: {
+            //             if: {
+            //                 $eq: [
+            //                     {
+            //                         $add: [
+            //                             { $toDouble: { $sum: { $map: { input: { $filter: { input: "$actions", as: "action", cond: { $and: [{ $eq: ["$$action.playerName", "Hero"] }] } } }, as: "action", in: { $ifNull: ["$$action.actionAmount", 0] } } } } },
+            //                             { $toDouble: "$heroChipBeforeHole" }
+            //                         ]
+            //                     },
+            //                     {
+            //                         $toDouble: {
+            //                             $arrayElemAt: [
+            //                                 { $map: { input: { $filter: { input: "$players", as: "player", cond: { $eq: ["$$player.playerName", "Hero"] } } }, as: "player", in: "$$player.chipCount" } },
+            //                                 0
+            //                             ]
+            //                         }
+            //                     }
+            //                 ]
+            //             },
+            //             then: {
+            //                 $cond: {
+            //                     if: {
+            //                         $gt: [{ $size: { $filter: { input: "$summary.collected", as: "item", cond: { $eq: ["$$item.playerName", "Hero"] } } } }, 0]
+            //                     },
+            //                     then: {
+            //                         $divide: [
+            //                             {
+            //                                 $subtract: [
+            //                                     {
+            //                                         $add: [
+            //                                             {
+            //                                                 $toDouble: { $arrayElemAt: [{ $map: { input: { $filter: { input: "$summary.collected", as: "item", cond: { $eq: ["$$item.playerName", "Hero"] } } }, as: "item", in: "$$item.amount" } }, 0] }
+            //                                             },
+            //                                             { $toDouble: "$returnedChip" }
+            //                                         ]
+            //                                     },
+            //                                     {
+            //                                         $add: [
+            //                                             { $toDouble: { $sum: { $map: { input: { $filter: { input: "$actions", as: "action", cond: { $and: [{ $eq: ["$$action.playerName", "Hero"] }] } } }, as: "action", in: { $ifNull: ["$$action.actionAmount", 0] } } } } },
+            //                                             {
+            //                                                 $subtract: [
+            //                                                     { $toDouble: "$heroChipBeforeHole" },
+            //                                                     { $toDouble: "$sbCaseChip" }
+            //                                                 ]
+            //                                             }
+            //                                         ]
+            //                                     }
+            //                                 ]
+            //                             },
+            //                             { $toDouble: "$bigBlind" }
+            //                         ]
+            //                     },
+            //                     else: {
+            //                         $multiply: [
+            //                             {
+            //                                 $divide: [
+            //                                     {
+            //                                         $subtract: [
+            //                                             {
+            //                                                 $add: [
+            //                                                     { $toDouble: { $sum: { $map: { input: { $filter: { input: "$actions", as: "action", cond: { $and: [{ $eq: ["$$action.playerName", "Hero"] }] } } }, as: "action", in: { $ifNull: ["$$action.actionAmount", 0] } } } } },
+            //                                                     { $toDouble: "$heroChipBeforeHole" }
+            //                                                 ]
+            //                                             },
+            //                                             { $toDouble: "$returnedChip" }
+            //                                         ]
+            //                                     },
+            //                                     { $toDouble: "$bigBlind" }
+            //                                 ]
+            //                             }, -1
+            //                         ]
+            //                     }
+            //                 }
+            //             },
+            //             else: 0
+            //         }
+            //     }
+            // },
             allinbb100: {
                 $sum: {
                     $cond: {
@@ -164,18 +243,7 @@ export class ReportGlobalStatisticService {
                         if: {
                             $and: [
                                 {
-                                    $gt: [
-                                        {
-                                            $size: {
-                                                $filter: {
-                                                    input: "$summary.shows",
-                                                    as: "show",
-                                                    cond: { $eq: ["$$show.playerName", "Hero"] },
-                                                },
-                                            },
-                                        },
-                                        0,
-                                    ]
+                                    $gt: [{ $size: { $filter: { input: "$summary.shows", as: "show", cond: { $eq: ["$$show.playerName", "Hero"] }, }, }, }, 0]
                                 },
                                 {
                                     $gt: [{ $size: { $filter: { input: "$summary.collected", as: "item", cond: { $eq: ["$$item.playerName", "Hero"] } } } }, 0]
@@ -211,7 +279,6 @@ export class ReportGlobalStatisticService {
                             ]
                         },
                         else: {
-
                             $multiply: [
                                 {
                                     $divide: [
@@ -228,7 +295,8 @@ export class ReportGlobalStatisticService {
                                         },
                                         { $toDouble: "$bigBlind" }
                                     ]
-                                }, -1]
+                                }, -1
+                            ]
                         }
                     }
                 }
@@ -239,18 +307,7 @@ export class ReportGlobalStatisticService {
                         if: {
                             $and: [
                                 {
-                                    $lt: [
-                                        {
-                                            $size: {
-                                                $filter: {
-                                                    input: "$summary.shows",
-                                                    as: "show",
-                                                    cond: { $eq: ["$$show.playerName", "Hero"] },
-                                                },
-                                            },
-                                        },
-                                        1,
-                                    ]
+                                    $lt: [{ $size: { $filter: { input: "$summary.shows", as: "show", cond: { $eq: ["$$show.playerName", "Hero"] } }, } }, 1,]
                                 },
                                 {
                                     $gt: [{ $size: { $filter: { input: "$summary.collected", as: "item", cond: { $eq: ["$$item.playerName", "Hero"] } } } }, 0]
@@ -308,7 +365,13 @@ export class ReportGlobalStatisticService {
                         }
                     }
                 }
-            }
+            },
+            ev: { $first: "$reportDetail.ev" },
+            sbCaseChip: { $first: "$sbCaseChip" },
+            returnedChip: { $first: "$returnedChip" },
+            heroChipBeforeHole: { $first: "$heroChipBeforeHole" },
+            holeCards: { $first: "$holeCards" },
+            summary: { $first: "$summary" }
         }
 
         let statistics = await this.handHistoryModel.aggregate([
@@ -321,6 +384,12 @@ export class ReportGlobalStatisticService {
                     allinbb100: 1,
                     showHand: 1,
                     notShowHand: 1,
+                    ev: 1,
+                    sbCaseChip: 1,
+                    returnedChip: 1,
+                    heroChipBeforeHole: 1,
+                    holeCards: 1,
+                    summary: 1
                 }
             }
         ])
@@ -334,10 +403,15 @@ export class ReportGlobalStatisticService {
         let count = 0;
 
         real.push({
-            sumBB: statistics[0].bb100,
-            sumExpected: statistics[0].allinbb100,
-            sumShow: statistics[0].showHand,
-            sumNotShowHand: statistics[0].notShowHand,
+            sumBB: parseFloat(statistics[0].bb100.toFixed(3)),
+            sumExpected: parseFloat(statistics[0].ev.toFixed(3)),
+            sumShow: parseFloat(statistics[0].showHand.toFixed(3)),
+            sumNotShowHand: parseFloat(statistics[0].notShowHand.toFixed(3)),
+            sbCaseChip: statistics[0].sbCaseChip,
+            returnedChip: statistics[0].returnedChip,
+            heroChipBeforeHole: statistics[0].heroChipBeforeHole,
+            holeCards: statistics[0].holeCards,
+            summary: statistics[0].summary
         });
 
         for (let i = 1; i < statistics.length; i++) {
@@ -345,19 +419,24 @@ export class ReportGlobalStatisticService {
             for (let j = 0; j < i; j++) {
 
                 sumBB += statistics[j].bb100;
-                sumExpected += statistics[j].allinbb100;
+                sumExpected += statistics[j].ev;
                 sumShow += statistics[j].showHand;
                 sumNotShowHand += statistics[j].notShowHand;
 
                 count++;
 
                 if (j === i - 1) {
-
                     real.push({
-                        sumBB: Math.round(sumBB),
-                        sumExpected: Math.round(sumExpected),
-                        sumShow: Math.round(sumShow),
-                        sumNotShowHand: Math.round(sumNotShowHand)
+                        sumBB: parseFloat(sumBB.toFixed(3)),
+                        sumExpected: parseFloat(sumExpected.toFixed(3)),
+                        sumShow: parseFloat(sumShow.toFixed(3)),
+                        sumNotShowHand: parseFloat(sumNotShowHand.toFixed(3)),
+
+                        sbCaseChip: statistics[j].sbCaseChip,
+                        returnedChip: statistics[j].returnedChip,
+                        heroChipBeforeHole: statistics[j].heroChipBeforeHole,
+                        holeCards: statistics[j].holeCards,
+                        summary: statistics[j].summary,
                     });
                     sumBB = 0;
                     sumExpected = 0;

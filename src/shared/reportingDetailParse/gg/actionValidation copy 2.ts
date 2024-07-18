@@ -7,7 +7,7 @@ import { GeneralReportLogicRecursive } from 'src/shared/parsingAction/GeneralRep
 
 const standards = [10, 15, 20, 25, 30, 40, 50, 60, 80, 100];
 
-export default function actionValidation(playerList: any, actionsList: any, heroPostion: any, stackRange: any, tableStandard: any, bufferBTNPosition: any, bigBlind: any, holeCards: any, ante: any, buttonSeat: any, heroChipBeforeHole: any, summary: any, communityCards: any): any {
+export default function actionValidation(playerList: any, actionsList: any, heroPostion: any, stackRange: any, tableStandard: any, bufferBTNPosition: any, bigBlind: any, holeCards: any, ante: any, buttonSeat: any, heroChipBeforeHole: any, summary: any): any {
 
     let reportDetail = {
         heroPosition: null,
@@ -87,180 +87,76 @@ export default function actionValidation(playerList: any, actionsList: any, hero
             .map((item: any) => item.cards)
             .map((item: any) => isolatingHand(item))
 
-        // let opponentPlayers = actionsList
-        //     .filter((action: any) => action.actionAmount !== null && action.playerName !== "Hero")
-        //     .map((action: any) => action.playerName);
-
-        let opponentPlayers = summary.shows
-            .filter((action: any) => action.playerName !== "Hero")
+        let opponentPlayers = stageActionList
+            .filter((action: any) => action.actionAmount !== null && action.playerName !== "Hero")
             .map((action: any) => action.playerName);
-
-        let unrepeatedopponentPlayers = new Set([...opponentPlayers])
-
-        // let opponentHands = holeCards
-        //     .filter((item: any) => opponentPlayers.includes(item.playerName))
-        //     .map((item: any) => item.cards)
-        //     .map((item: any) => isolatingHand(item))
-
-        let opponentHands = summary.shows
-            .filter((action: any) => action.playerName !== "Hero")
+        let opponentHands = holeCards
+            .filter((item: any) => opponentPlayers.includes(item.playerName))
             .map((item: any) => item.cards)
             .map((item: any) => isolatingHand(item))
 
         opponentHands.unshift(heroHands[0]);
 
-        // console.log("stageActionList", stageActionList);
-        // console.log("summary", summary);
+        console.log("stageActionList", stageActionList);
+        console.log("summary", summary);
 
-        let heroChip: any = 0
+        if (heroHands.length > 0) {
 
-        const heroPlayer = playerList.find((player: any) => player.playerName === 'Hero');
+            let heroAction = stageActionList[indexItem]
 
-        // Check if heroPlayer is found and log chipCount if found
-        if (heroPlayer) {
-            heroChip = heroPlayer.chipCount; // Outputs: 11500
-        }
-
-        let lastIndex = -1;
-
-        for (let i = actionsList.length - 1; i >= 0; i--) {
-            if (actionsList[i].playerName === 'Hero' && actionsList[i].action.includes('all in')) {
-                lastIndex = i;
-                break;
-            }
-        }
-
-        const sumActionAmount = actionsList.reduce((sum: any, action: any) => {
-            if (action.playerName === 'Hero' && action.actionAmount !== null) {
-                return sum + action.actionAmount;
-            }
-            return sum;
-        }, 0);
-
-        if (heroChip <= (heroChipBeforeHole + sumActionAmount) && lastIndex !== -1) {
+            const sumActionAmounts = stageActionList.slice(0, -1).reduce((sum: any, item: any) => {
+                if (item.playerName !== 'Hero') {
+                    return sum + (item.actionAmount || 0);
+                }
+                return sum;
+            }, 0);
 
             let isHeroWinner = summary.collected.find((item: any) => item.playerName === "Hero")
 
-            console.log("isHeroWinner", isHeroWinner);
+            if (opponentPlayers.length > 1) {
 
-            let allinStreet = actionsList[lastIndex].street
-
-            let streeetMap = {
-                "preFlop": 0,
-                "Flop": 3,
-                "Turn": 4,
-                "River": 5
-            }
-
-            let communityCardsLastIndex = streeetMap[allinStreet]
-
-            let communityCardList = communityCards.slice(0, communityCardsLastIndex).map((item: any) => item.rank + item.suit)
-
-            if (!isHeroWinner) {
-                console.log("summary.collected", summary.collected);
-                console.log("playerList", playerList);
-                console.log("actionsList", actionsList);
-                // this is part which have to focus on 
-                reportDetail.ev = -20
-            } else {
-
-                let herowinningchip = isHeroWinner.amount
-
-                let winningchip = herowinningchip - heroChip
-                let losingchip = heroChip
-
-
-
-                // const Table = new TexasHoldem(buttonSeat);
-                const Table = new TexasHoldem(buttonSeat);
-
-                if (opponentHands.length === 1) {
-                    // console.log("opponentHands", opponentHands);
-                    // console.log("player", playerList);
-                }
-
-                if (communityCardsLastIndex > 0) {
-
-                    opponentHands.forEach((hand: any) => {
-                        Table.addPlayer(hand);
-                    });
-                    Table.setBoard(communityCardList)
-
+                if (heroAction.actionAmount === null) {
+                    let ev = Number(((heroChipBeforeHole) / bigBlind).toFixed(4))
+                    console.log("villain is there but hero fold : ev", -ev);
+                    reportDetail.ev = -ev
                 } else {
-                    opponentHands.forEach((hand: any) => {
-                        Table.addPlayer(hand);
-                    });
+
+                    if (!isHeroWinner) {
+                        console.log("! isHeroWinner : ev", 0);
+                        reportDetail.ev = 0
+                    } else {
+                        const Table = new TexasHoldem(buttonSeat);
+
+                        opponentHands.forEach((hand: any) => {
+                            Table.addPlayer(hand);
+                        });
+
+                        const Result = Table.calculate();
+
+                        let winningPercentage = parseFloat(Result.getPlayers()[0].getWinsPercentageString().replace('~', '').replace('%', '')) / 100
+                        let losingPercentage = 1 - winningPercentage
+                        let total = heroChipBeforeHole + sumActionAmounts
+                        let ev = Number((((total + heroAction.actionAmount) * winningPercentage - heroAction.actionAmount * losingPercentage) / bigBlind).toFixed(4))
+                        console.log("with villain : ev", ev);
+                        reportDetail.ev = ev
+                    }
+
                 }
-
-                const Result = Table.calculate();
-
-                let winningPercentage = parseFloat(Result.getPlayers()[0].getWinsPercentageString().replace('~', '').replace('%', '')) / 100
-                let losingPercentage = 1 - winningPercentage
-
-                let ev = winningchip * winningPercentage - losingchip * losingPercentage
-
-                let bbinev = Number((ev / bigBlind).toFixed(4))
-                reportDetail.ev = bbinev
+            } else {
+                let ev = Number(((heroChipBeforeHole) / bigBlind).toFixed(4))
+                if (!isHeroWinner) {
+                    reportDetail.ev = -ev
+                } else {
+                    reportDetail.ev = ev
+                }
+                console.log("sumActionAmounts", sumActionAmounts);
+                console.log("No villain : ev", ev);
             }
-        } else reportDetail.ev = 0
-
-        // if (heroHands.length > 0) {
-
-        //     let heroAction = stageActionList[indexItem]
-
-        //     const sumActionAmounts = stageActionList.slice(0, -1).reduce((sum: any, item: any) => {
-        //         if (item.playerName !== 'Hero') {
-        //             return sum + (item.actionAmount || 0);
-        //         }
-        //         return sum;
-        //     }, 0);
-
-        //     let isHeroWinner = summary.collected.find((item: any) => item.playerName === "Hero")
-
-        //     if (opponentPlayers.length > 1) {
-
-        //         if (heroAction.actionAmount === null) {
-        //             let ev = Number(((heroChipBeforeHole) / bigBlind).toFixed(4))
-        //             console.log("villain is there but hero fold : ev", -ev);
-        //             reportDetail.ev = -ev
-        //         } else {
-
-        //             if (!isHeroWinner) {
-        //                 console.log("! isHeroWinner : ev", 0);
-        //                 reportDetail.ev = 0
-        //             } else {
-
-        //                 const Table = new TexasHoldem(buttonSeat);
-
-        //                 opponentHands.forEach((hand: any) => {
-        //                     Table.addPlayer(hand);
-        //                 });
-
-        //                 const Result = Table.calculate();
-
-        //                 let winningPercentage = parseFloat(Result.getPlayers()[0].getWinsPercentageString().replace('~', '').replace('%', '')) / 100
-        //                 let losingPercentage = 1 - winningPercentage
-        //                 let total = heroChipBeforeHole + sumActionAmounts
-        //                 let ev = Number((((total + heroAction.actionAmount) * winningPercentage - heroAction.actionAmount * losingPercentage) / bigBlind).toFixed(4))
-        //                 console.log("with villain : ev", ev);
-        //                 reportDetail.ev = ev
-        //             }
-
-        //         }
-        //     } else {
-        //         let ev = Number(((heroChipBeforeHole) / bigBlind).toFixed(4))
-        //         if (!isHeroWinner) {
-        //             reportDetail.ev = -ev
-        //         } else {
-        //             reportDetail.ev = ev
-        //         }
-
-        //     }
-        // } else {
-        //     let ev = Number(((heroChipBeforeHole) / bigBlind).toFixed(4))
-        //     console.log("No hero : ev", 0);
-        //     reportDetail.ev = 0
-        // }
+        } else {
+            let ev = Number(((heroChipBeforeHole) / bigBlind).toFixed(4))
+            console.log("No hero : ev", 0);
+            reportDetail.ev = 0
+        }
 
         actionItem.processedActionList = extractingActionList(stageActionList)
         bufferReportDetailAction.push(actionItem)

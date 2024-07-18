@@ -28,6 +28,7 @@ export class PokerHistoryDto {
   regionalHandTimezone: string;
   gameFormat: string;
   pokerForm: string;
+  heroChipBeforeHole: number;
   pokerType: string;
   pokerRoomId: string | null;
   tournamentSpeed: string;

@@ -1,7 +1,7 @@
 import actionValidation from './actionValidation'
 import { calculatingHeroPosition, tableSeat } from '../index'
 
-export async function reportingDetailParseGG(players: any, actions: any, bigBlind: any, buttonSeat: any): Promise<any> {
+export async function reportingDetailParseGG(players: any, actions: any, bigBlind: any, buttonSeat: any, holeCards: any, ante: any, heroChipBeforeHole: any, summary: any, communityCards: any): Promise<any> {
 
     const standards = [10, 15, 20, 25, 30, 40, 50, 60, 80, 100];
 
@@ -16,8 +16,8 @@ export async function reportingDetailParseGG(players: any, actions: any, bigBlin
     let stackAmount = Number((players.filter((item: any) => item.seatNumber === bufferHeroSeat)[0].chipCount / bigBlind).toFixed(2))
 
     let stackRange = await findNearestStandard(stackAmount, standards);
-    let heroAction = await actionValidation(players, actions, heroPostion, stackRange, tableStandard, bufferBTNPosition, bigBlind)
-    
+    let heroAction = await actionValidation(players, actions, heroPostion, stackRange, tableStandard, bufferBTNPosition, bigBlind, holeCards, ante, buttonSeat, heroChipBeforeHole, summary, communityCards)
+
     return heroAction
 }
 

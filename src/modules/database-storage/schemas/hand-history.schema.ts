@@ -140,8 +140,10 @@ export class HandHistory {
           call: Number,
           allin: Number,
         },
+        ev: Number,
         _id: false
       }],
+      ev: Number
     },
     _id: false
   })
@@ -168,7 +170,9 @@ export class HandHistory {
         call: number;
         allin: number;
       };
+      ev: number
     }[];
+    ev: number;
   };
 
   @Prop({

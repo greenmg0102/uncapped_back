@@ -31,3 +31,12 @@ export function exchangeLetter(first: string, second: string) {
 }
 
 export const cardArray = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"]
+
+export function isolatingHand(cardList: any): any {
+    let real = []
+
+    real[0] = cardList[0].rank + cardList[0].suit
+    real[1] = cardList[1].rank + cardList[1].suit
+
+    return real
+}

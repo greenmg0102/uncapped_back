@@ -32,7 +32,7 @@ export class HandHistoryRepository {
 
       let reportContent = await reportingParse(query.pokerRoomId, query.players, query.actions, query.bigBlind, query.buttonSeat)
       let processedActionList = await identifyActionList(query.actions)
-      let reportDetail = await reportingDetailParse(query.pokerRoomId, query.players, query.actions, query.bigBlind, query.buttonSeat)
+      let reportDetail = await reportingDetailParse(query.pokerRoomId, query.players, query.actions, query.bigBlind, query.buttonSeat, query.holeCards, query.ante, query.heroChipBeforeHole, query.summary, query.communityCards)
 
       let bufferQuery = { ...query, reportContent: reportContent, reportDetail: reportDetail, processedActionList: processedActionList, userId: new ObjectId(userId) }
 
@@ -43,6 +43,7 @@ export class HandHistoryRepository {
         await newClient
           .save()
           .then((res: any) => {
+            console.log('1', index);
             return
           })
           .catch((err: any) => {
