@@ -26,9 +26,9 @@ export function extractingActionList(actionList: any): any {
     return result
 }
 
-export default async function reportingDetailParse(pokerRoomId: any, players: any, actions: any, bigBlind: any, buttonSeat: any): Promise<any> {
+export default async function reportingDetailParse(pokerRoomId: any, players: any, actions: any, bigBlind: any, buttonSeat: any, holeCards: any, ante: any, heroChipBeforeHole: any, summary: any, communityCards: any): Promise<any> {
     // if (pokerRoomId === "GGPoker") 
-    return await reportingDetailParseGG(players, actions, bigBlind, buttonSeat)
+    return await reportingDetailParseGG(players, actions, bigBlind, buttonSeat, holeCards, ante, heroChipBeforeHole, summary, communityCards)
 }
 
 export function calculatingHeroPosition(currentPosition: any, tableStandard: any, buttonSeat: any): any {
@@ -45,8 +45,8 @@ export function calculatingPosition(currentPosition: any, tableStandard: any, bu
 
     return {
         position: villainPosition,
-        villainStackDepth:currentPosition.villainStackDepth,
-        villainAction:currentPosition.villainAction,
+        villainStackDepth: currentPosition.villainStackDepth,
+        villainAction: currentPosition.villainAction,
         previousActionAmount: currentPosition.previousActionAmount,
         currentVillainActionAmount: currentPosition.currentVillainActionAmount,
         villainCategory: currentPosition.villainCategory

@@ -16,7 +16,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
 
       clientID: "1047816426192-n7e5n61ein1pkf13pogd6k9e9t9g0llj.apps.googleusercontent.com",
       clientSecret: "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",
-      callbackURL: "https://api.uncappedtheory.com/api/v1/auth/google/redirect",
+      callbackURL: "http://localhost:8000/api/v1/auth/google/redirect",
 
       scope: 'email',
       profileFields: ['emails', 'name']

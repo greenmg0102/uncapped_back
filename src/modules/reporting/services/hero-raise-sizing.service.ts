@@ -10,8 +10,6 @@ export class HeroRaiseSizingService {
 
   async extractingHeroRaisingTable(body: any) {
 
-    console.log("extractingHeroRaisingTable", body);
-
     let bufferAction = body.actionType.includes("all in") ? body.actionType.replace(/\s\(all in\)/g, '') : body.actionType
     let bufferTableSeat = body.tableSize === '2~10' ? [2, 3, 4, 5, 6, 7, 8, 9, 10] : [body.tableSize]
 
@@ -25,7 +23,7 @@ export class HeroRaiseSizingService {
       userId: new mongoose.Types.ObjectId(body.userId),
       "reportDetail.action": { $elemMatch: { category: { $in: [bufferAction] } } },
       "reportDetail.stackDepth": { $in: stackDepthBucket[body.stackDepth] },
-      pokerRoomId: body.pokerType,
+      pokerRoomId: body.pokerType === 'N/A' ? { '$exists': true } : body.pokerType,
       maxTableSeats: { $in: bufferTableSeat },
       date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) }
     };
@@ -465,10 +463,6 @@ export class HeroRaiseSizingService {
         }
       }
     ]);
-
-    console.log("statistics", statistics);
-
-
 
     return statistics
   }

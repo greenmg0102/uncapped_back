@@ -5,9 +5,6 @@ import { availableSqueezeRecursive } from 'src/shared/report/availableSqueezeRec
 
 export async function SqueezeReportLogic(body: any) {
 
-  console.log("body", body);
-
-
   let result: any = []
 
   let tableSize = body.tableSize

@@ -50,8 +50,6 @@ export class ReportUserGeneratingService {
 
   async userDataGenerating(body: any) {
 
-    console.log("userDataGenerating", body);
-
     let heroPosiotionList = exchangeIntoNumberFromPositionString(body.heroPosition)
     let villianPosiotionList = exchangeIntoNumberFromPositionString(body.VillianPosition)
     let stackDepth = body.stackDepth
@@ -90,8 +88,6 @@ export class ReportUserGeneratingService {
   }
 
   async squeezeUserDataGenerating(body: any) {
-
-    console.log("squeezeUserDataGenerating", body);
 
     let actionList = body.actionLit
     let heroIndex = actionList.findIndex((item: any) => item.action === "H")

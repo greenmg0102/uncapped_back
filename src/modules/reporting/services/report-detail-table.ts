@@ -34,7 +34,7 @@ export class ReportDetailTableService {
       let matchObj = {
         userId: new mongoose.Types.ObjectId(body.userId),
         "reportDetail.action": action === "" ? { $exists: true } : { $elemMatch: { category: { $in: [body.action] } } },
-        pokerRoomId: body.pokerType,
+        pokerRoomId: body.pokerType === 'N/A' ? { '$exists': true } : body.pokerType,
         maxTableSeats: { $in: bufferTableSeat },
         date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) }
       };
@@ -238,8 +238,6 @@ export class ReportDetailTableService {
 
       return statistics;
     } else {
-
-      console.log("body", body);
 
       let heroPosiotionList = exchangeIntoNumberFromPositionString(body.heroPosition)
       let villianPosiotionList = exchangeIntoNumberFromPositionString(body.VillianPosition)

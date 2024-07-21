@@ -17,7 +17,7 @@ export class ReportScatterService {
     async globalStatistic(body: any) {
 
         let globalStatisticResult = await this.reportGlobalStatisticService.globalStatistic(body)
-        return  globalStatisticResult 
+        return globalStatisticResult
     }
 
     async scatterStatstic(body: any) {

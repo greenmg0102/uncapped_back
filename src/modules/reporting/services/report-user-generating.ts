@@ -49,14 +49,14 @@ export class ReportUserGeneratingService {
   }
 
   async userDataGenerating(body: any) {
-
-    console.log("userDataGenerating", body);
-
-    let heroPosiotionList = exchangeIntoNumberFromPositionString(body.heroPosition)
+    
+    let heroPosiotionList = exchangeIntoNumberFromPositionString(body.heroPositionList)
     let villianPosiotionList = exchangeIntoNumberFromPositionString(body.VillianPosition)
-    let stackDepth = body.stackDepth
+    let stackDepth = body.stackDepthList
     let action = body.action
 
+    console.log('action', action);
+    
     let pipeLine = {
       userId: new mongoose.Types.ObjectId(body.userId),
       // "reportContent.action": { $elemMatch: { $eq: action } },
@@ -69,6 +69,10 @@ export class ReportUserGeneratingService {
       maxTableSeats: body.tableSize,
       date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) }
     }
+    
+    console.log("heroPosiotionList", heroPosiotionList);
+    console.log("stackDepth", stackDepth);
+    console.log("action", action);
 
     if (heroPosiotionList.length > 0) pipeLine["reportContent.heroPosition"] = { $in: heroPosiotionList }
     if (villianPosiotionList.length > 0) pipeLine["$or"] = villianPosiotionList.map((item: any) => { return { "reportContent.villain": { $elemMatch: { $eq: item } } } })

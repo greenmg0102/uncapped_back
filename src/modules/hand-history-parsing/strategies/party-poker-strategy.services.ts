@@ -338,8 +338,6 @@ class PartyPokerStrategyService extends BaseParser {
     if (numbers && numbers.length >= 4) {
       const fourthNumber = Number(numbers[3]);
 
-      console.log("fourthNumber", fourthNumber);
-      
       return fourthNumber
     } else {
       console.log("No fourth number found.");

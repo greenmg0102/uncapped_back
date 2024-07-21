@@ -10,7 +10,7 @@ export class IgnitionPokerStrategyService extends BaseParser {
   }
 
   parse(sections: string[]): ParsedReturnData {
-    
+
     let data: ParsedReturnData = {
       data: [],
       parsedNumber: 0,
@@ -398,6 +398,10 @@ export class IgnitionPokerStrategyService extends BaseParser {
       const holeCards = holeCardsRegex.exec(line);
 
       if (holeCards) {
+        if (holeCards[1].includes("ME")) {
+          console.log('holeCards[1]', holeCards[1]);
+          console.log('holeCards[2]', holeCards[2]);
+        }
         this.handData.holeCards.push({
           playerName: holeCards[1].includes("ME") ? "Hero" : holeCards[1],
           cards: this.getCardsDetail(holeCards[2].split(' ')),

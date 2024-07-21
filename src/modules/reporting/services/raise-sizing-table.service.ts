@@ -14,7 +14,6 @@ export class RaiseSizingTableService {
     const limit = body.pageSize;
 
     let bufferAction = body.actionType.includes("all in") ? body.actionType.replace(/\s\(all in\)/g, '') : body.actionType
-
     let bufferTableSeat = body.tableSize === '2~10' ? [2, 3, 4, 5, 6, 7, 8, 9, 10] : [body.tableSize]
 
 
@@ -139,7 +138,7 @@ export class RaiseSizingTableService {
 
       let conditionPairPipeline = {
         userId: new mongoose.Types.ObjectId(body.userId),
-        pokerRoomId: body.pokerType,
+        pokerRoomId: body.pokerType === 'N/A' ? { '$exists': true } : body.pokerType,
         maxTableSeats: { $in: bufferTableSeat },
         date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) },
         "reportDetail.action": {
@@ -212,14 +211,9 @@ export class RaiseSizingTableService {
 
     } else if (body.type === "villain") {
 
-      console.log("stackDepthBucket[body.stackDepth]", stackDepthBucket[body.stackDepth]);
-      console.log("body.actionType", body.actionType);
-      console.log("bbRange[body.field]", bbRange[body.field]);
-
-      
       let conditionPairPipeline = {
         userId: new mongoose.Types.ObjectId(body.userId),
-        pokerRoomId: body.pokerType,
+        pokerRoomId: body.pokerType === 'N/A' ? { '$exists': true } : body.pokerType,
         maxTableSeats: { $in: bufferTableSeat },
         date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) },
         "reportDetail.action": {
@@ -302,9 +296,6 @@ export class RaiseSizingTableService {
           }
         ]
       };
-      
-      
-
 
       const handsPipeline = [
         { $match: conditionPairPipeline },
@@ -326,11 +317,9 @@ export class RaiseSizingTableService {
 
     } else if (body.type === "Suqeeze") {
 
-      console.log("body", body);
-
       let conditionPairPipeline = {
         userId: new mongoose.Types.ObjectId(body.userId),
-        pokerRoomId: body.pokerType,
+        pokerRoomId: body.pokerType === 'N/A' ? { '$exists': true } : body.pokerType,
         maxTableSeats: { $in: bufferTableSeat },
         date: { $gte: new Date(body.range.split(" to ")[0]), $lte: new Date(body.range.split(" to ")[1]) },
         "reportDetail.action": {
