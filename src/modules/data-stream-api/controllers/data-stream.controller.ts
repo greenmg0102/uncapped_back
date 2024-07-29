@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   UploadedFiles,
   UseInterceptors,
   HttpCode,
@@ -17,6 +18,8 @@ import { AuthGuard } from '@nestjs/passport'
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { DetectorService } from '../../poker-room-detection/services/detector.service';
 import { HandHistoryDataWriterService } from '../../database-storage/services/hand-history-data-writer.service';
+import { DatabaseUpdateService } from '../services/database-update.service';
+
 import { RoomStrategyFactory } from '../../hand-history-parsing/factories/room-strategy.factory';
 import { ParsedReturnData } from 'src/modules/hand-history-parsing/interfaces/parser.interface';
 import { Readable } from 'stream';
@@ -28,6 +31,7 @@ export class DataStreamController {
   constructor(
     private roomDetection: DetectorService,
     private readonly handModelService: HandHistoryDataWriterService,
+    private readonly databaseUpdateService: DatabaseUpdateService,
     private readonly roomStrategyFactory: RoomStrategyFactory,
     private readonly roomType: RoomTypes,
   ) { }
@@ -194,5 +198,15 @@ export class DataStreamController {
     } catch (e) {
       return throwError(() => new HttpException(e.toString(), 400));
     }
+  }
+
+
+  // @UseGuards(AuthGuard('jwt'))
+  @Get('/database-update')
+  @HttpCode(200)
+  @UsePipes(new ValidationPipe())
+  async databaseUpdate(@Req() request: Request) {
+    let result = await this.databaseUpdateService.updateDdbyNewLogic()
+    return result
   }
 }

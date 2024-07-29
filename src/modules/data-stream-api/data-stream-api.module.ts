@@ -11,6 +11,8 @@ import { EightStarStrategyService } from '../hand-history-parsing/strategies/eig
 import { GgPokerStrategyService } from '../hand-history-parsing/strategies/gg-poker-strategy.service';
 import { PokerStarsStrategyService } from '../hand-history-parsing/strategies/poker-stars-strategy.service';
 import { HandHistoryDataWriterService } from '../database-storage/services/hand-history-data-writer.service';
+import { DatabaseUpdateService } from '../data-stream-api/services/database-update.service';
+
 import { IgnitionPokerStrategyService } from '../hand-history-parsing/strategies/ignition-poker-strategy.service';
 import { ChicoPokerStrategyService } from '../hand-history-parsing/strategies/chico-poker-strategy.service';
 import { DatabaseStorageModule } from '../database-storage/database-storage.module';
@@ -19,7 +21,7 @@ import { PartyPokerStrategyService } from '../hand-history-parsing/strategies/pa
 import { WinamaxPokerStrategyService } from '../hand-history-parsing/strategies/winamax-poker-strategy.service';
 import { WpnPokerStrategyService } from '../hand-history-parsing/strategies/wpn-poker-strategy.service';
 import { IPokerStrategyService } from '../hand-history-parsing/strategies/ipoker-strategy.service';
-import { HandHistory } from '../database-storage/schemas/hand-history.schema';
+import { HandHistory, HandHistorySchema } from '../database-storage/schemas/hand-history.schema';
 import { UserHandFrequencyRepository } from 'src/modules/database-storage/services/user-hand-frequency.service'
 import { CardFrequency, CardFrequencySchema } from 'src/modules/database-storage/schemas/user-hand-frequency';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -29,6 +31,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     DatabaseStorageModule,
     MongooseModule.forFeature([
       { name: CardFrequency.name, schema: CardFrequencySchema },
+      { name: HandHistory.name, schema: HandHistorySchema },
     ]),
   ],
   controllers: [
@@ -36,6 +39,7 @@ import { MongooseModule } from '@nestjs/mongoose';
   ],
   providers: [
     HandHistoryDataWriterService,
+    DatabaseUpdateService,
     HandHistoryParserService,
     DetectorService,
     RoomTypes,
@@ -51,7 +55,6 @@ import { MongooseModule } from '@nestjs/mongoose';
     WpnPokerStrategyService,
     IPokerStrategyService,
     RoomStrategyFactory,
-    HandHistory,
     UserHandFrequencyRepository,
   ],
 })
