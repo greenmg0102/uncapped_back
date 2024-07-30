@@ -400,7 +400,7 @@ export class ReportGlobalStatisticService {
         let sumShow = 0;
         // let sumNotShowHand = 0;
 
-        // let count = 0;
+        let count = 0;
 
         if (statistics.length === 0) {
             return {
@@ -421,16 +421,10 @@ export class ReportGlobalStatisticService {
             summary: statistics[0].summary
         });
 
-        let total = statistics.length
-        console.log("total", total);
+        console.log("statistics.length", statistics.length);
+        
 
-        let step = 1
-
-        step = dividedRate.find((item: any) => item.min < total && item.max > total).step
-        console.log("step", step);
-
-
-        for (let i = 1; i < statistics.length; i += step) {
+        for (let i = 1; i < statistics.length; i += 20) {
 
             for (let j = 0; j < i; j++) {
 
@@ -439,7 +433,7 @@ export class ReportGlobalStatisticService {
                 sumShow += statistics[j].showHand;
                 // sumNotShowHand += statistics[j].notShowHand;
 
-                // count++;
+                count++;
 
                 if (j === i - 1) {
                     real.push({
@@ -459,13 +453,13 @@ export class ReportGlobalStatisticService {
                     sumShow = 0;
                     // sumNotShowHand = 0;
 
-                    // count = 0;
+                    count = 0;
                 }
             }
         }
 
         return {
-            total: total,
+            total: statistics.length,
             result: real
         };
 

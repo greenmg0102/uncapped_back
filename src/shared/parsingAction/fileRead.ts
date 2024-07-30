@@ -132,3 +132,36 @@ export function exchangeIntoNumberFromPositionString(array: any) {
   let max8 = ["UTG", "UTG+1", "LJ", "HJ", "CO", "BTN", "SB", "BB"]
   return array.map((element: any) => max8.indexOf(element));
 }
+
+export const dividedRate = [
+  {
+    min: 0,
+    max: 1001,
+    step: 1
+  },
+  {
+    min: 1000,
+    max: 2001,
+    step: 2
+  },
+  {
+    min: 2000,
+    max: 5001,
+    step: 3
+  },
+  {
+    min: 5000,
+    max: 10001,
+    step: 5
+  },
+  {
+    min: 10000,
+    max: 20001,
+    step: 10
+  },
+  {
+    min: 20000,
+    max: 50001,
+    step: 25
+  },
+]

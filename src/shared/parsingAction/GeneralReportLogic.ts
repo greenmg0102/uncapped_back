@@ -3,7 +3,7 @@ import { actionRecursive } from 'src/shared/report/recursiveData'
 
 export function GeneralReportLogic(body: any) {
 
-  console.log("GeneralReportLogic", body);
+  // console.log("GeneralReportLogic", body);
 
   let actonTraking = actionRecursive[body.action]
 
@@ -20,6 +20,9 @@ export function GeneralReportLogic(body: any) {
 
   let buffer = actonTraking[heroPositionList[0]];
 
+  console.log("heroPositionList", heroPositionList);
+  console.log("buffer", buffer);
+
   const processBuffer = async () => {
     try {
       await Promise.all(Object.keys(buffer).map(async (key: any) => {
@@ -35,8 +38,6 @@ export function GeneralReportLogic(body: any) {
   };
 
   processBuffer();
-
-  console.log("buffer", buffer);
   
 
   stackDepthList.forEach((stack: any) => heroPositionList.forEach((position: any, order: any) => {
