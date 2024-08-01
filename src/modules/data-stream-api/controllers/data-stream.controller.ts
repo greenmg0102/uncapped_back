@@ -152,32 +152,38 @@ export class DataStreamController {
       let notParsedFiles = 0;
 
       for (const file of files) {
+        console.log(file);
+        
         const fileContent = file;
         const sections: string[] = fileContent.split(/\n\s*(?:\n\s*){1,3}/);
+
         const roomType = this.roomDetection.identifyRoom(sections[0]);
+        const isNoLimit = this.roomDetection.noLimitDectec(sections[0]);
 
-        if (roomType === this.roomType.noType) wrongFiles++;
-        else correctFiles++;
+        if (roomType === this.roomType.noType || !isNoLimit) wrongFiles++;
+        else {
+          correctFiles++;
 
-        const strategyService = this.roomStrategyFactory.createStrategy(roomType);
+          const strategyService = this.roomStrategyFactory.createStrategy(roomType);
 
-        if (strategyService) {
+          if (strategyService) {
 
-          let data: ParsedReturnData = await strategyService.parse(sections);
+            let data: ParsedReturnData = await strategyService.parse(sections);
 
-          const user: any = request.user;
-          const userId = user.sub._id;
+            const user: any = request.user;
+            const userId = user.sub._id;
 
-          await this.handModelService
-            .saveHistory(data.data, roomType, userId)
-            .then((res: any) => {
+            await this.handModelService
+              .saveHistory(data.data, roomType, userId)
+              .then((res: any) => {
 
-              parsedFiles++;
-              notParsedFiles = correctFiles - parsedFiles;
-            })
-            .catch((err: any) => {
-              console.log(err);
-            });
+                parsedFiles++;
+                notParsedFiles = correctFiles - parsedFiles;
+              })
+              .catch((err: any) => {
+                console.log(err);
+              });
+          }
         }
       }
 

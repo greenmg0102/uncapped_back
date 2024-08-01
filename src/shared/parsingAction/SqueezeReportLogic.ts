@@ -7,17 +7,24 @@ export async function SqueezeReportLogic(body: any) {
 
   let result: any = []
 
-  let tableSize = body.tableSize
-  let actionList = body.actionLit
-  let heroIndex = actionList.findIndex((item: any) => item.action === "H")
+  try {
 
-  let availableActionList = actionList.filter((item: any, index: any) => index < heroIndex).map((item: any) => item.action)
+    let tableSize = body.tableSize
+    let actionList = body.actionLit
+    let heroIndex = actionList.findIndex((item: any) => item.action === "H")
 
-  for (const stack of body.SqueezeStackDepth) {
-    let real = nextNode(stack, tableSize, 0, availableActionList, 0)
-    result = [real]
+    let availableActionList = actionList.filter((item: any, index: any) => index < heroIndex).map((item: any) => item.action)
+
+    for (const stack of body.SqueezeStackDepth) {
+      let real = nextNode(stack, tableSize, 0, availableActionList, 0)
+      result = [real]
+    }
+    return sumAverage(result)
+  } catch (error) {
+    console.error("An error occurred:", error);
+    return {}
+    throw error;  // Re-throw the error after logging it, or handle it as needed
   }
-  return sumAverage(result)
 
 }
 

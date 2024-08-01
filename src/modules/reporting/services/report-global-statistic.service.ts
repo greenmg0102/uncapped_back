@@ -399,7 +399,6 @@ export class ReportGlobalStatisticService {
         let sumExpected = 0;
         let sumShow = 0;
         // let sumNotShowHand = 0;
-
         // let count = 0;
 
         if (statistics.length === 0) {
@@ -428,7 +427,6 @@ export class ReportGlobalStatisticService {
 
         step = dividedRate.find((item: any) => item.min < total && item.max > total).step
         console.log("step", step);
-
 
         for (let i = 1; i < statistics.length; i += step) {
 
