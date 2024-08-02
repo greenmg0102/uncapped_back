@@ -17,9 +17,6 @@ export class EachHandGetService {
 
     const { pageNumber, pageSize, pokerType, tableSize, heroPosition, range, userId } = pageData;
 
-    console.log("pageData", pageData);
-    
-
     let seatNumber = this.getPlayerSeatNumber(heroPosition)
 
     const skip = (pageNumber - 1) * pageSize;
